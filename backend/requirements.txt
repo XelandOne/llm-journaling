@@ -1,0 +1,5 @@
+elevenlabs>=2.3.0
+python-dotenv
+sqlalchemy
+aiosqlite
+mistralai>=1.8.2

@@ -1,5 +1,0 @@
-elevenlabs==0.3.0
-python-dotenv==1.0.0
-sqlalchemy
-aiosqlite
-mistralai==1.8.2
