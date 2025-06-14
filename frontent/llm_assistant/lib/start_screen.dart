@@ -1,7 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'event.dart';
 import 'bottom_sheet.dart';
+import 'package:cupertino_icons/cupertino_icons.dart';
 
 class StartScreen extends StatefulWidget {
   const StartScreen({super.key});
@@ -30,7 +32,8 @@ class _StartScreenState extends State<StartScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Events today', style: Theme.of(context).textTheme.headlineSmall),
+          Text('Events today', style: Theme.of(context).textTheme.headlineMedium),
+          Divider(thickness: 1, color: Colors.grey.shade300),
           const SizedBox(height: 16),
           FutureBuilder<List<Event>>(
             future: _eventsFuture,
@@ -46,10 +49,13 @@ class _StartScreenState extends State<StartScreen> {
               return Column(
                 children: [
                   ...events.map((event) => Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 2,
                         child: ListTile(
+                          leading: Icon(CupertinoIcons.calendar, color: Theme.of(context).colorScheme.primary),
                           title: Text(
                             '${_formatTime(event.startTime)}: ${event.description}',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
                           subtitle: const Text('→ click for advice'),
                           onTap: () {
@@ -69,7 +75,8 @@ class _StartScreenState extends State<StartScreen> {
             },
           ),
           const SizedBox(height: 32),
-          Text('Advice for today', style: Theme.of(context).textTheme.headlineSmall),
+          Text('Advice for today', style: Theme.of(context).textTheme.headlineMedium),
+          Divider(thickness: 1, color: Colors.grey.shade200),
           const SizedBox(height: 8),
           FutureBuilder<String>(
             future: _adviceFuture,
@@ -79,15 +86,14 @@ class _StartScreenState extends State<StartScreen> {
               } else if (snapshot.hasError) {
                 return Text('Error: \\${snapshot.error}');
               }
-              return Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.grey.shade100,
+              return Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 1,
+                color: Colors.grey.shade100,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(snapshot.data ?? '', style: Theme.of(context).textTheme.bodyLarge),
                 ),
-                child: Text(snapshot.data ?? '', style: Theme.of(context).textTheme.bodyLarge),
               );
             },
           ),

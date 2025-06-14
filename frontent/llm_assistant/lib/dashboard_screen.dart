@@ -1,7 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'feeling.dart';
 import 'dart:math';
+import 'package:cupertino_icons/cupertino_icons.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -30,7 +32,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Your last week in stats', style: Theme.of(context).textTheme.headlineSmall),
+            Text('Your last week in stats', style: Theme.of(context).textTheme.headlineMedium),
+            Divider(thickness: 1, color: Colors.grey.shade300),
             const SizedBox(height: 16),
             FutureBuilder<List<Feeling>>(
               future: _feelingsFuture,
@@ -50,47 +53,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 final anxAvg = anxScores.isNotEmpty ? anxScores.reduce((a, b) => a + b) / anxScores.length : 0.0;
                 return Column(
                   children: [
-                    Row(
-                      children: [
-                        _StatCircle(label: 'Productivity', value: prodAvg.toDouble()),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
+                    Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          children: [
+                            Icon(CupertinoIcons.chart_bar_alt_fill, color: Theme.of(context).colorScheme.primary),
+                            const SizedBox(width: 12),
+                            _StatCircle(label: 'Productivity', value: prodAvg.toDouble()),
+                            const SizedBox(width: 16),
+                            Expanded(
                               child: Text(
                                 prodAvg > 7 ? 'Your productivity was very high' : 'Your productivity was moderate',
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        _StatCircle(label: 'Anxiety', value: anxAvg.toDouble()),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
+                    Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          children: [
+                            Icon(CupertinoIcons.waveform_path_ecg, color: Theme.of(context).colorScheme.primary),
+                            const SizedBox(width: 12),
+                            _StatCircle(label: 'Anxiety', value: anxAvg.toDouble()),
+                            const SizedBox(width: 16),
+                            Expanded(
                               child: Text(
                                 anxAvg > 7 ? 'Your anxiety was very high' : 'Your anxiety was moderate',
                                 style: Theme.of(context).textTheme.bodyLarge,
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 );
               },
             ),
             const SizedBox(height: 32),
-            Text('AI Feedback', style: Theme.of(context).textTheme.headlineSmall),
+            Text('AI Feedback', style: Theme.of(context).textTheme.headlineMedium),
+            Divider(thickness: 1, color: Colors.grey.shade200),
             const SizedBox(height: 8),
             FutureBuilder<String>(
               future: _aiFeedbackFuture,
@@ -100,15 +112,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 } else if (snapshot.hasError) {
                   return Text('Error: \\${snapshot.error}');
                 }
-                return Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.grey.shade100,
+                return Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 1,
+                  color: Colors.grey.shade100,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(snapshot.data ?? '', style: Theme.of(context).textTheme.bodyLarge),
                   ),
-                  child: Text(snapshot.data ?? '', style: Theme.of(context).textTheme.bodyLarge),
                 );
               },
             ),
