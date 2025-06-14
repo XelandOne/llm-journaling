@@ -2,6 +2,12 @@ from fastapi import FastAPI, Query, Body
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime, date
+from backend.datamodels import Event, Feeling, ChatEntry
+import uvicorn
+from database import Base, engine
+import backend.models
+from sqlalchemy.orm import Session
+from database import SessionLocal
 
 app = FastAPI(title="LifeChat API", description="API for logging and analyzing life events and feelings.", version="1.0.0")
 
@@ -9,25 +15,16 @@ app = FastAPI(title="LifeChat API", description="API for logging and analyzing l
 EVENT_TAGS = ["work", "social", "health", "personal", "family", "travel", "education", "other"]
 FEELING_ENUM = ["calm", "motivated", "stressed", "anxious", "happy", "sad", "angry", "relaxed", "excited", "tired"]
 
-# Models
-class Event(BaseModel):
-    date: date
-    startTime: datetime
-    endTime: datetime
-    description: str
-    tags: List[str] = Field(..., example=["work", "social"])
-
-class Feeling(BaseModel):
-    feelings: List[str] = Field(..., example=["happy", "calm"])
-    score: int = Field(..., ge=1, le=10)
-    datetime: datetime
-
-class ChatEntry(BaseModel):
-    chat: str = Field(..., example="I felt happy during my vacation.")
-
 # Mocked database
 events_db = []
 feelings_db = []
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 @app.post("/lifeChat")
 def submit_life_chat(entry: ChatEntry):
@@ -64,3 +61,8 @@ def get_advice(startTime: datetime = Query(...), endTime: datetime = Query(...))
         return "Consider taking a break or talking to a friend."
     else:
         return "Keep up the good work and maintain your routine!"
+
+
+if __name__ == "__main__":
+    Base.metadata.create_all(bind=engine)
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
