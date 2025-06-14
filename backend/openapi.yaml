@@ -189,6 +189,8 @@ components:
           format: date-time
         description:
           type: string
+        name:
+          type: string
         tags:
           type: string
     Feeling:
