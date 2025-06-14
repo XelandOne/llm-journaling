@@ -109,38 +109,38 @@ async def get_advice(startTime: datetime, endTime: datetime, db: Session = Depen
     
     return response.choices[0].message.content
 
-# @app.post("/lifeChat")
-# async def submit_life_chat(chat: dict):
-#     """
-#     Process a life chat entry and extract event and feeling information.
-#     """
-#     try:
-#         messages = [
-#             ChatMessage(role="system", content="""Extract event and feeling information from the user's chat.
-#             Return a JSON with two objects: 'event' and 'feeling'.
-#             Event should include date, startTime, endTime, description, and tags.
-#             Feeling should include feelings (list of emotions), score (1-10), and datetime."""),
-#             ChatMessage(role="user", content=chat["chat"])
-#         ]
+@app.post("/lifeChat")
+async def submit_life_chat(chat: dict):
+    """
+    Process a life chat entry and extract event and feeling information.
+    """
+    try:
+        messages = [
+            ChatMessage(role="system", content="""Extract event and feeling information from the user's chat.
+            Return a JSON with two objects: 'event' and 'feeling'.
+            Event should include date, startTime, endTime, description, and tags.
+            Feeling should include feelings (list of emotions), score (1-10), and datetime."""),
+            ChatMessage(role="user", content=chat["chat"])
+        ]
         
-#         response = mistral_client.chat(
-#             model="mistral-large",
-#             messages=messages
-#         )
+        response = mistral_client.chat(
+            model="mistral-large",
+            messages=messages
+        )
         
-#         extracted_data = eval(response.choices[0].message.content)
+        extracted_data = eval(response.choices[0].message.content)
         
-#         event = Event(**extracted_data["event"])
-#         feeling = Feeling(**extracted_data["feeling"])
+        event = Event(**extracted_data["event"])
+        feeling = Feeling(**extracted_data["feeling"])
         
-#         # Store the data
-#         events_db.append(event)
-#         feelings_db.append(feeling)
+        # Store the data
+        events_db.append(event)
+        feelings_db.append(feeling)
         
-#         return {"event": event, "feeling": feeling}
+        return {"event": event, "feeling": feeling}
     
-#     except Exception as e:
-#         raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 if __name__ == "__main__":
