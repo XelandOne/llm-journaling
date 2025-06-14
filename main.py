@@ -62,14 +62,6 @@ def get_feelings(
     feelings = db.query(models.Feeling).all()
     return feelings
 
-# @app.post("/lifeChat")
-# def submit_life_chat(entry: ChatEntry):
-#     result = extract_event_and_feeling(entry.chat)
-#     extracted_event = Event(**result["event"])
-#     extracted_feeling = Feeling(**result["feeling"])
-#     events_db.append(extracted_event)
-#     feelings_db.append(extracted_feeling)
-#     return {"event": extracted_event, "feeling": extracted_feeling}
 
 
 
