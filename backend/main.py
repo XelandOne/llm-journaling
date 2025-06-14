@@ -40,7 +40,6 @@ async def submit_life_chat(chat: dict):
     Process a life chat entry and extract event and feeling information.
     """
     try:
-        # Use Mistral AI to analyze the chat and extract structured information
         messages = [
             ChatMessage(role="system", content="""Extract event and feeling information from the user's chat.
             Return a JSON with two objects: 'event' and 'feeling'.
@@ -50,7 +49,7 @@ async def submit_life_chat(chat: dict):
         ]
         
         response = mistral_client.chat(
-            model="mistral-small",
+            model="mistral-large",
             messages=messages
         )
         
@@ -123,12 +122,8 @@ async def get_advice(startTime: datetime, endTime: datetime):
     ]
     
     response = mistral_client.chat(
-        model="mistral-small",
+        model="mistral-large",
         messages=messages
     )
     
     return response.choices[0].message.content
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
