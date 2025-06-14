@@ -32,6 +32,7 @@ def get_db():
 def read_root():
     return {"message": "Welcome to the LifeChat API! Use the endpoints to log events and feelings, and get advice."}
 
+
 @app.post("/addEvent")
 def add_event(description: str, db: Session = Depends(get_db)):
     new_event = models.Event(
@@ -58,18 +59,58 @@ def add_feeling(feelings: str, score: int, db: Session = Depends(get_db)):
     return new_feeling
 
 @app.get("/getAllEvents")
-def get_events(
+def getAllEvents(
     db: Session = Depends(get_db)
 ):
     events = db.query(models.Event).all()
     return events
 
 @app.get("/getAllFeelings")
-def get_feelings(
+def getAllFeelings(
     db: Session = Depends(get_db)
 ):
     feelings = db.query(models.Feeling).all()
     return feelings
+
+@app.get("/getEvents")
+def get_events(
+    startTime: datetime = Query(..., description="Start time for the events"),
+    endTime: datetime = Query(..., description="End time for the events"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get events within a specified date range.
+    """
+    events = db.query(models.Event).filter(
+        models.Event.startTime >= startTime,
+        models.Event.endTime <= endTime
+    ).all()
+    
+    if not events:
+        raise HTTPException(status_code=404, detail="No events found in the specified range.")
+    
+    return [e.description for e in events]
+
+
+@app.get("/getFeelings")
+def get_feelings(   
+    startTime: datetime = Query(..., description="Start time for the feelings"),
+    endTime: datetime = Query(..., description="End time for the feelings"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get feelings within a specified date range.
+    """
+    feelings = db.query(models.Feeling).filter(
+        models.Feeling.datetime >= startTime,
+        models.Feeling.datetime <= endTime
+    ).all()
+    
+    if not feelings:
+        raise HTTPException(status_code=404, detail="No feelings found in the specified range.")
+    
+    return [f.feelings for f in feelings]
+
 
 @app.get("/getAdvice")
 async def get_advice(startTime: datetime, endTime: datetime, db: Session = Depends(get_db)):
