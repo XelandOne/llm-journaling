@@ -20,3 +20,11 @@ class Feeling(Base):
     feelings = Column(String)  # Comma-separated feelings
     score = Column(Integer)
     datetime = Column(DateTime, default=datetime.datetime.now)
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    score = Column(Integer, default=0)
