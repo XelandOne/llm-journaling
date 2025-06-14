@@ -75,8 +75,6 @@ async def get_advice(startTime: datetime, endTime: datetime, db: Session = Depen
     """
     Get advice based on events and feelings in a date range.
     """
-
-    # Fetch events and feelings from the database
     events_db = db.query(models.Event).filter(
         models.Event.startTime >= startTime,
         models.Event.endTime <= endTime
