@@ -5,7 +5,7 @@ import 'feeling.dart';
 import 'chat_response.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://your-backend-url'; // TODO: Set your backend URL
+  static const String baseUrl = 'http://0.0.0.0:8000'; // TODO: Set your backend URL
 
   Future<List<Event>> getEventsToday() async {
     final now = DateTime.now();
