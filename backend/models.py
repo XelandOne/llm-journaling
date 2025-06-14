@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Date, Table
 from sqlalchemy.orm import relationship
-from backend.database import Base
+from database import Base
 import datetime
 
 class Event(Base):

@@ -2,8 +2,8 @@ from fastapi import FastAPI, Query, Body
 from typing import List, Optional
 from datetime import datetime, date
 import uvicorn
-from backend.database import SessionLocal, Base, engine
-import backend.models as models
+from database import SessionLocal, Base, engine
+import models as models
 # from backend.mistral import extract_event_and_feeling, generate_advice
 from sqlalchemy.orm import Session
 from fastapi import Depends
@@ -87,13 +87,12 @@ async def get_advice(startTime: datetime, endTime: datetime, db: Session = Depen
         models.Feeling.datetime <= endTime
     ).all()
 
-    
     context = f"""
     Events in the period:
-    {[event.description for event in relevant_events]}
+    {[event.description for event in events_db]}
     
     Feelings in the period:
-    {[feeling.feelings for feeling in relevant_feelings]}
+    {[feeling.feelings for feeling in feelings_db]}
     """
     
     messages = [
