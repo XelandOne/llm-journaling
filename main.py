@@ -35,6 +35,33 @@ def add_event(description: str, db: Session = Depends(get_db)):
     db.refresh(new_event)
     return new_event
 
+
+@app.post("/addFeeling")
+def add_feeling(feelings: str, score: int, db: Session = Depends(get_db)):
+    new_feeling = models.Feeling(
+        feelings=feelings,
+        score=score,
+        datetime=datetime.now()
+    )
+    db.add(new_feeling)
+    db.commit()
+    db.refresh(new_feeling)
+    return new_feeling
+
+@app.get("/getAllEvents")
+def get_events(
+    db: Session = Depends(get_db)
+):
+    events = db.query(models.Event).all()
+    return events
+
+@app.get("/getAllFeelings")
+def get_feelings(
+    db: Session = Depends(get_db)
+):
+    feelings = db.query(models.Feeling).all()
+    return feelings
+
 # @app.post("/lifeChat")
 # def submit_life_chat(entry: ChatEntry):
 #     result = extract_event_and_feeling(entry.chat)
@@ -44,23 +71,6 @@ def add_event(description: str, db: Session = Depends(get_db)):
 #     feelings_db.append(extracted_feeling)
 #     return {"event": extracted_event, "feeling": extracted_feeling}
 
-# @app.get("/getEvents", response_model=List[Event])
-# def get_events(startTime: datetime = Query(...), endTime: datetime = Query(...)):
-#     return [e for e in events_db if startTime <= e.startTime <= endTime]
-
-# @app.get("/getFeelings", response_model=List[Feeling])
-# def get_feelings(startTime: datetime = Query(...), endTime: datetime = Query(...)):
-#     return [f for f in feelings_db if startTime <= f.datetime <= endTime]
-
-# @app.get("/getAdvice", response_model=str)
-# def get_advice(startTime: datetime = Query(...), endTime: datetime = Query(...)):
-#     filtered_events = [e.dict() for e in events_db if startTime <= e.startTime <= endTime]
-#     filtered_feelings = [f.dict() for f in feelings_db if startTime <= f.datetime <= endTime]
-
-#     if not filtered_events and not filtered_feelings:
-#         return "Not enough data to generate advice."
-
-#     return generate_advice(filtered_events, filtered_feelings)
 
 
 if __name__ == "__main__":

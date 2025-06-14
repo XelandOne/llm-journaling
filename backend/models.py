@@ -11,13 +11,13 @@ class Event(Base):
     startTime = Column(DateTime)
     endTime = Column(DateTime)
     description = Column(String)
-    tags = Column(String)  # You can use comma-separated strings or normalize with another table
+    tags = Column(String)  
 
 class Feeling(Base):
     __tablename__ = "feelings"
 
     id = Column(Integer, primary_key=True, index=True)
-    feelings = Column(String)  # Comma-separated feelings
+    feelings = Column(String)  
     score = Column(Integer)
     datetime = Column(DateTime, default=datetime.datetime.now)
 
