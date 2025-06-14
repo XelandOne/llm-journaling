@@ -8,6 +8,7 @@ servers:
   - url: http://localhost:8000
 
 paths:
+paths:
   /lifeChat:
     post:
       summary: Submit a life chat entry.
@@ -23,17 +24,24 @@ paths:
                   example: "I felt happy during my vacation."
       responses:
         '200':
-          description: Event and feeling extracted from the chat.
+          description: Message, extracted events, and optional feeling.
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  event:
-                    $ref: '#/components/schemas/Event'
+                  message:
+                    type: string
+                    example: "Ohh, this sounds very interesting. I have added a few events to your life log."
+                  events:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Event'
                   feeling:
                     $ref: '#/components/schemas/Feeling'
-
+                required:
+                  - message
+                  - events
   /getEvents:
     get:
       summary: Get events between two datetimes.
