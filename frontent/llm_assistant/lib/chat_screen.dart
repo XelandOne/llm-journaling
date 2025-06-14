@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'chat_response.dart';
+import 'package:cupertino_icons/cupertino_icons.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -45,36 +47,49 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Let's chat about", style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 32),
+          Text("Let's chat about", style: Theme.of(context).textTheme.headlineMedium),
+          const SizedBox(height: 16),
+          Divider(thickness: 1, color: Colors.grey.shade300),
+          const SizedBox(height: 16),
           Center(
-            child: Icon(Icons.bubble_chart, size: 80, color: Theme.of(context).colorScheme.primary.withOpacity(0.2)),
+            child: Icon(CupertinoIcons.chat_bubble_2_fill, size: 80, color: Theme.of(context).colorScheme.primary.withOpacity(0.2)),
           ),
-          const SizedBox(height: 32),
-          Text('Chat', style: Theme.of(context).textTheme.titleMedium),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(
-                    hintText: '... type in your thoughts',
-                    border: OutlineInputBorder(),
+          const SizedBox(height: 24),
+          Text('Chat', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: const InputDecoration(
+                        hintText: '... type in your thoughts',
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                      ),
+                      minLines: 1,
+                      maxLines: 3,
+                      enabled: !_loading,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (_) => _sendChat(),
+                    ),
                   ),
-                  minLines: 1,
-                  maxLines: 3,
-                  enabled: !_loading,
-                  onSubmitted: (_) => _sendChat(),
-                ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: _loading
+                        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(CupertinoIcons.paperplane_fill),
+                    onPressed: _loading ? null : _sendChat,
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: _loading
-                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Icons.send),
-                onPressed: _loading ? null : _sendChat,
-              ),
-            ],
+            ),
           ),
           if (_error != null) ...[
             const SizedBox(height: 8),
@@ -82,6 +97,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
           const SizedBox(height: 32),
           Text('Detecting Log', style: Theme.of(context).textTheme.titleMedium),
+          Divider(thickness: 1, color: Colors.grey.shade200),
           const SizedBox(height: 8),
           Expanded(
             child: _chatHistory.isEmpty

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cupertino_icons/cupertino_icons.dart';
 import 'start_screen.dart';
 import 'dashboard_screen.dart';
 import 'chat_screen.dart';
@@ -32,8 +33,23 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+          brightness: Brightness.light,
+        ),
         useMaterial3: true,
+        textTheme: const TextTheme(
+          headlineLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+          headlineMedium: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+          headlineSmall: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+          titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          titleMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+          titleSmall: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          bodyLarge: TextStyle(fontSize: 16),
+          bodyMedium: TextStyle(fontSize: 14),
+          bodySmall: TextStyle(fontSize: 12),
+          labelSmall: TextStyle(fontSize: 10, letterSpacing: 0.5),
+        ),
       ),
       home: const MainNavigation(),
     );
