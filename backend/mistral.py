@@ -26,7 +26,7 @@ def extract_event_and_feeling(chat: str) -> dict:
     user = {
         "role": "user",
         "content": f"""
-Chat: "{chat}"
+    Chat: "{chat}"
 
 Return a JSON object in this format:
 {{
@@ -56,12 +56,12 @@ def generate_advice(events: list, feelings: list) -> str:
     user = {
         "role": "user",
         "content": f"""
-Here are the user's events:
-{json.dumps(events, indent=2)}
+    Here are the user's events:
+    {json.dumps(events, indent=2)}
 
-Here are the user's feelings:
-{json.dumps(feelings, indent=2)}
+    Here are the user's feelings:
+    {json.dumps(feelings, indent=2)}
 
-Please provide personal, supportive advice.""",
+    Please provide personal, supportive advice.""",
     }
     return call_mistral([system, user], temperature=0.9)

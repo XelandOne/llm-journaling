@@ -8,7 +8,6 @@ servers:
   - url: http://localhost:8000
 
 paths:
-paths:
   /lifeChat:
     post:
       summary: Submit a life chat entry.
