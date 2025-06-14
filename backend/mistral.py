@@ -21,7 +21,7 @@ def call_mistral(messages, model="mistral-small", temperature=0.7):
 def extract_event_and_feeling(chat: str) -> dict:
     system = {
         "role": "system",
-        "content": "Extract structured Event and Feeling data from a user chat log.",
+        "content": "Extract structured Event and Feeling data from a user chat log. Make sure events are atomic and separated",
     }
     user = {
         "role": "user",
@@ -31,6 +31,7 @@ Chat: "{chat}"
 Return a JSON object in this format:
 {{
   "event": {{
+    "name": "Short name of the event",
     "date": "YYYY-MM-DD",
     "startTime": "YYYY-MM-DDTHH:MM:SS",
     "endTime": "YYYY-MM-DDTHH:MM:SS",

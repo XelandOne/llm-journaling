@@ -14,6 +14,7 @@ FEELING_ENUM = ["calm", "motivated", "stressed", "anxious", "happy", "sad", "ang
 
 # Models
 class Event(BaseModel):
+    name: str
     date: date
     startTime: datetime
     endTime: datetime

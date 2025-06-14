@@ -112,6 +112,9 @@ components:
     Event:
       type: object
       properties:
+        name:
+          type: string
+          description: Short name of the event, e.g., "Vacation in Spain"
         date:
           type: string
           format: date
@@ -129,7 +132,7 @@ components:
             type: string
             enum: [work, social, health, personal, family, travel, education, other]
           description: List of tags for the event.
-
+          
     Feeling:
       type: object
       properties:
