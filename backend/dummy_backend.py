@@ -4,7 +4,13 @@ from typing import List, Optional
 from datetime import datetime, timedelta
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="LifeChat API", description="API for logging and analyzing life events and feelings.", version="1.0.0")
+from mistral import extract_event_and_feeling
+
+app = FastAPI(
+    title="LifeChat API",
+    description="API for logging and analyzing life events and feelings.",
+    version="1.0.0",
+)
 
 # Allow CORS for local frontend testing
 app.add_middleware(
@@ -15,6 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # --- Schemas ---
 class Event(BaseModel):
     date: str
@@ -23,17 +30,40 @@ class Event(BaseModel):
     description: str
     tags: List[str]
 
+
 class Feeling(BaseModel):
     feelings: List[str]
     score: int = Field(..., ge=1, le=10)
     datetime: str
 
+
 # --- Dummy Data Generation ---
-TAGS = ["work", "social", "health", "personal", "family", "travel", "education", "other"]
-FEELINGS = ["calm", "motivated", "stressed", "anxious", "happy", "sad", "angry", "relaxed", "excited", "tired"]
+TAGS = [
+    "work",
+    "social",
+    "health",
+    "personal",
+    "family",
+    "travel",
+    "education",
+    "other",
+]
+FEELINGS = [
+    "calm",
+    "motivated",
+    "stressed",
+    "anxious",
+    "happy",
+    "sad",
+    "angry",
+    "relaxed",
+    "excited",
+    "tired",
+]
 
 START_DATE = datetime(2025, 6, 1)
 END_DATE = datetime(2025, 7, 1)
+
 
 # Generate dummy events and feelings for each day in the range
 def generate_dummy_events():
@@ -44,14 +74,17 @@ def generate_dummy_events():
         for j in range(1, 3):
             start = day + timedelta(hours=8 + j * 2)
             end = start + timedelta(hours=1)
-            events.append(Event(
-                date=day.strftime("%Y-%m-%d"),
-                startTime=start.isoformat(),
-                endTime=end.isoformat(),
-                description=f"Dummy event {j} on {day.strftime('%Y-%m-%d')}",
-                tags=[TAGS[(i + j) % len(TAGS)]]
-            ))
+            events.append(
+                Event(
+                    date=day.strftime("%Y-%m-%d"),
+                    startTime=start.isoformat(),
+                    endTime=end.isoformat(),
+                    description=f"Dummy event {j} on {day.strftime('%Y-%m-%d')}",
+                    tags=[TAGS[(i + j) % len(TAGS)]],
+                )
+            )
     return events
+
 
 def generate_dummy_feelings():
     feelings = []
@@ -60,54 +93,56 @@ def generate_dummy_feelings():
         # 1-2 feelings per day
         for j in range(1, 3):
             dt = day + timedelta(hours=10 + j * 3)
-            feelings.append(Feeling(
-                feelings=[FEELINGS[(i + j) % len(FEELINGS)]],
-                score=5 + ((i + j) % 6),
-                datetime=dt.isoformat()
-            ))
+            feelings.append(
+                Feeling(
+                    feelings=[FEELINGS[(i + j) % len(FEELINGS)]],
+                    score=5 + ((i + j) % 6),
+                    datetime=dt.isoformat(),
+                )
+            )
     return feelings
+
 
 DUMMY_EVENTS = generate_dummy_events()
 DUMMY_FEELINGS = generate_dummy_feelings()
 
+
 # --- Endpoints ---
 @app.post("/lifeChat")
-def submit_life_chat(chat: dict):
-    # Dummy extraction: always returns the same event/feeling
-    return {
-        "event": {
-            "date": "2025-06-15",
-            "startTime": "2025-06-15T09:00:00",
-            "endTime": "2025-06-15T10:00:00",
-            "description": "Vacation day at the beach",
-            "tags": ["travel", "personal"]
-        },
-        "feeling": {
-            "feelings": ["happy", "relaxed"],
-            "score": 8,
-            "datetime": "2025-06-15T11:00:00"
-        }
-    }
+def submit_life_chat(chat: str):
+    result = extract_event_and_feeling(chat)
+    return result
+
 
 @app.get("/getEvents", response_model=List[Event])
 def get_events(startTime: str = Query(...), endTime: str = Query(...)):
     start = datetime.fromisoformat(startTime)
     end = datetime.fromisoformat(endTime)
-    return [e for e in DUMMY_EVENTS if start <= datetime.fromisoformat(e.startTime) < end]
+    return [
+        e for e in DUMMY_EVENTS if start <= datetime.fromisoformat(e.startTime) < end
+    ]
+
 
 @app.get("/getFeelings", response_model=List[Feeling])
 def get_feelings(startTime: str = Query(...), endTime: str = Query(...)):
     start = datetime.fromisoformat(startTime)
     end = datetime.fromisoformat(endTime)
-    return [f for f in DUMMY_FEELINGS if start <= datetime.fromisoformat(f.datetime) < end]
+    return [
+        f for f in DUMMY_FEELINGS if start <= datetime.fromisoformat(f.datetime) < end
+    ]
+
 
 @app.get("/getAdvice", response_model=str)
 def get_advice(startTime: str = Query(...), endTime: str = Query(...)):
     # Dummy advice based on the number of events/feelings in the range
     start = datetime.fromisoformat(startTime)
     end = datetime.fromisoformat(endTime)
-    events = [e for e in DUMMY_EVENTS if start <= datetime.fromisoformat(e.startTime) < end]
-    feelings = [f for f in DUMMY_FEELINGS if start <= datetime.fromisoformat(f.datetime) < end]
+    events = [
+        e for e in DUMMY_EVENTS if start <= datetime.fromisoformat(e.startTime) < end
+    ]
+    feelings = [
+        f for f in DUMMY_FEELINGS if start <= datetime.fromisoformat(f.datetime) < end
+    ]
     if not events and not feelings:
         return "No data for this period. Try to log more events and feelings!"
     avg_score = sum(f.score for f in feelings) / len(feelings) if feelings else 5
@@ -118,6 +153,7 @@ def get_advice(startTime: str = Query(...), endTime: str = Query(...)):
     else:
         return "It looks like you've had a tough time. Reach out to friends or family, and take care of yourself."
 
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+    uvicorn.run(app, host="0.0.0.0", port=8000)

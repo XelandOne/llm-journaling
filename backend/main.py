@@ -24,6 +24,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
+
 # --- Schemas ---
 class Event(BaseModel):
     date: str
@@ -33,10 +34,12 @@ class Event(BaseModel):
     name: str
     tags: List[str]
 
+
 class Feeling(BaseModel):
     feelings: List[str]
     score: int = Field(..., ge=1, le=10)
     datetime: str
+
 
 mistral_client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))
 
