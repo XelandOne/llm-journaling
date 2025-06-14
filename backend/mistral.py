@@ -51,7 +51,8 @@ Return a JSON object in this format:
 def generate_advice(events: list, feelings: list) -> str:
     system = {
         "role": "system",
-        "content": "You are a kind, thoughtful life coach. Provide advice based on events and emotional states.",
+        "content": """You are a kind, thoughtful life coach.
+        """,
     }
     user = {
         "role": "user",
@@ -62,6 +63,11 @@ def generate_advice(events: list, feelings: list) -> str:
     Here are the user's feelings:
     {json.dumps(feelings, indent=2)}
 
-    Please provide personal, supportive advice.""",
+    Please provide personal, supportive advice.
+    Provide advice based on events and emotional states. 
+    Please return some advices for the user to achieve their goals.
+    Please return a list of advices of maximum 3.
+    Do not preamble. Just return the list of advices.
+    """,
     }
-    return call_mistral([system, user], temperature=0.9)
+    return call_mistral([system, user], temperature=0.3)

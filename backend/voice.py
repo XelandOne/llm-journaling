@@ -1,9 +1,12 @@
-
 import os
 from typing import IO
 from io import BytesIO
-from elevenlabs import VoiceSettings
-from elevenlabs.client import ElevenLabs
+from elevenlabs import VoiceSettings, ElevenLabs
+from dotenv import load_dotenv
+from pydub import AudioSegment
+from pydub.playback import play
+
+load_dotenv()
 
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 elevenlabs = ElevenLabs(
@@ -18,7 +21,6 @@ def text_to_speech_stream(text: str) -> IO[bytes]:
         output_format="mp3_22050_32",
         text=text,
         model_id="eleven_multilingual_v2",
-        # Optional voice settings that allow you to customize the output
         voice_settings=VoiceSettings(
             stability=0.0,
             similarity_boost=1.0,
@@ -36,10 +38,8 @@ def text_to_speech_stream(text: str) -> IO[bytes]:
         if chunk:
             audio_stream.write(chunk)
 
-    # Reset stream position to the beginning
     audio_stream.seek(0)
 
-    # Return the stream for further use
     return audio_stream
 
 
@@ -49,3 +49,11 @@ def speech_to_text(audio_stream: IO[bytes]) -> str:
         model_id="eleven_multilingual_v2",
     )
     return response
+
+
+if __name__ == '__main__':
+    audio = text_to_speech_stream("Hallo du Banause, wie kann ich dir helfen?")
+
+    # MP3-Stream direkt abspielen
+    audio_segment = AudioSegment.from_file(audio, format="mp3")
+    play(audio_segment)
