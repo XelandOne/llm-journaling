@@ -5,10 +5,10 @@ from datetime import datetime, date
 from backend.datamodels import Event, Feeling, ChatEntry
 import uvicorn
 from database import Base, engine
-import backend.models
+import models
 from sqlalchemy.orm import Session
 from database import SessionLocal
-
+from fastapi import Depends
 from mistral import extract_event_and_feeling, generate_advice
 
 
@@ -29,6 +29,20 @@ def get_db():
     finally:
         db.close()
 
+
+@app.post("/addEvent")
+def add_event(description: str, db: Session = Depends(get_db)):
+    new_event = models.Event(
+        startTime=datetime.now(),
+        endTime=datetime.now(),
+        description=description,
+        tags="personal"
+    )
+    db.add(new_event)
+    db.commit()
+    db.refresh(new_event)
+    return new_event
+
 @app.post("/lifeChat")
 def submit_life_chat(entry: ChatEntry):
     result = extract_event_and_feeling(entry.chat)
@@ -48,19 +62,6 @@ def get_feelings(startTime: datetime = Query(...), endTime: datetime = Query(...
 
 @app.get("/getAdvice", response_model=str)
 def get_advice(startTime: datetime = Query(...), endTime: datetime = Query(...)):
-<<<<<<< HEAD
-    # Dummy advice logic
-    relevant_feelings = [f for f in feelings_db if startTime <= f.datetime <= endTime]
-    if any("sad" in f.feelings or "stressed" in f.feelings for f in relevant_feelings):
-        return "Consider taking a break or talking to a friend."
-    else:
-        return "Keep up the good work and maintain your routine!"
-
-
-if __name__ == "__main__":
-    Base.metadata.create_all(bind=engine)
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
-=======
     filtered_events = [e.dict() for e in events_db if startTime <= e.startTime <= endTime]
     filtered_feelings = [f.dict() for f in feelings_db if startTime <= f.datetime <= endTime]
 
@@ -68,4 +69,3 @@ if __name__ == "__main__":
         return "Not enough data to generate advice."
 
     return generate_advice(filtered_events, filtered_feelings)
->>>>>>> aab0fbc10702dbdf4b3a9c574b8b3f1cf4bbe29b
