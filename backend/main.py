@@ -29,6 +29,10 @@ def get_db():
         db.close()
 
 
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the LifeChat API! Use the endpoints to log events and feelings, and get advice."}
+
 @app.post("/addEvent")
 def add_event(description: str, db: Session = Depends(get_db)):
     new_event = models.Event(
@@ -41,7 +45,6 @@ def add_event(description: str, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_event)
     return new_event
-
 
 @app.post("/addFeeling")
 def add_feeling(feelings: str, score: int, db: Session = Depends(get_db)):
@@ -108,7 +111,7 @@ async def get_advice(startTime: datetime, endTime: datetime, db: Session = Depen
     return response.choices[0].message.content
 
 @app.post("/lifeChat")
-async def submit_life_chat(chat: dict):
+async def submit_life_chat(chat: dict, db: Session = Depends(get_db)):
     """
     Process a life chat entry and extract event and feeling information.
     """
@@ -131,9 +134,10 @@ async def submit_life_chat(chat: dict):
         event = Event(**extracted_data["event"])
         feeling = Feeling(**extracted_data["feeling"])
         
-        # Store the data
-        events_db.append(event)
-        feelings_db.append(feeling)
+        db.add(event)
+        db.add(feeling)
+        db.commit()
+        db.refresh(event)
         
         return {"event": event, "feeling": feeling}
     
