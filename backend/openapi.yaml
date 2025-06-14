@@ -161,8 +161,6 @@ paths:
               schema:
                 type: object
                 properties:
-                  event:
-                    $ref: '#/components/schemas/Event'
                   message:
                     type: string
                     example: "Ohh, this sounds very interesting. I have added a few events to your life log."
