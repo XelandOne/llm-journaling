@@ -7,8 +7,7 @@ import models as models
 # from backend.mistral import extract_event_and_feeling, generate_advice
 from sqlalchemy.orm import Session
 from fastapi import Depends
-from mistralai.client import MistralClient
-from mistralai.models.chat_completion import ChatMessage
+from mistralai import Mistral
 import os
 from fastapi import FastAPI, HTTPException
 from dotenv import load_dotenv
@@ -19,7 +18,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="LifeChat API", description="API for logging and analyzing life events and feelings.", version="1.0.0")
 
-mistral_client = MistralClient(api_key=os.getenv('MISTRAL_API_KEY'))
+mistral_client = Mistral(api_key=os.getenv('MISTRAL_API_KEY'))
 
 def get_db():
     db = SessionLocal()
@@ -72,7 +71,6 @@ def get_feelings(
     feelings = db.query(models.Feeling).all()
     return feelings
 
-
 @app.get("/getAdvice")
 async def get_advice(startTime: datetime, endTime: datetime, db: Session = Depends(get_db)):
     """
@@ -95,20 +93,22 @@ async def get_advice(startTime: datetime, endTime: datetime, db: Session = Depen
     Feelings in the period:
     {[feeling.feelings for feeling in feelings_db]}
     """
-    
-    messages = [
-        ChatMessage(role="system", content="""You are a helpful life coach. 
-        Based on the user's events and feelings, provide specific, actionable advice.
-        Keep the advice concise and practical."""),
-        ChatMessage(role="user", content=context)
-    ]
-    
-    response = mistral_client.chat(
-        model="mistral-large",
-        messages=messages
+        
+    chat_response = mistral_client.chat.complete(
+        model = "mistral-large-latest",
+        messages = [
+            {
+                "role": "system",
+                "content": "You are a helpful life coach.Based on the user's events and feelings, provide specific, actionable advice.Keep the advice concise and practical."
+            },
+            {
+                "role": "user",
+                "content": context
+            },
+        ]
     )
-    
-    return response.choices[0].message.content
+        
+    return chat_response.choices[0].message.content
 
 @app.post("/lifeChat")
 async def submit_life_chat(chat: dict, db: Session = Depends(get_db)):
