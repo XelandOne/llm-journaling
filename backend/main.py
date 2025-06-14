@@ -3,6 +3,9 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime, date
 
+from mistral import extract_event_and_feeling, generate_advice
+
+
 app = FastAPI(title="LifeChat API", description="API for logging and analyzing life events and feelings.", version="1.0.0")
 
 # Enums and constants
@@ -31,19 +34,9 @@ feelings_db = []
 
 @app.post("/lifeChat")
 def submit_life_chat(entry: ChatEntry):
-
-    extracted_event = Event(
-        date=date.today(),
-        startTime=datetime.now(),
-        endTime=datetime.now(),
-        description="Vacation",
-        tags=["travel"]
-    )
-    extracted_feeling = Feeling(
-        feelings=["happy"],
-        score=8,
-        datetime=datetime.now()
-    )
+    result = extract_event_and_feeling(entry.chat)
+    extracted_event = Event(**result["event"])
+    extracted_feeling = Feeling(**result["feeling"])
     events_db.append(extracted_event)
     feelings_db.append(extracted_feeling)
     return {"event": extracted_event, "feeling": extracted_feeling}
@@ -58,9 +51,10 @@ def get_feelings(startTime: datetime = Query(...), endTime: datetime = Query(...
 
 @app.get("/getAdvice", response_model=str)
 def get_advice(startTime: datetime = Query(...), endTime: datetime = Query(...)):
-    # Dummy advice logic
-    relevant_feelings = [f for f in feelings_db if startTime <= f.datetime <= endTime]
-    if any("sad" in f.feelings or "stressed" in f.feelings for f in relevant_feelings):
-        return "Consider taking a break or talking to a friend."
-    else:
-        return "Keep up the good work and maintain your routine!"
+    filtered_events = [e.dict() for e in events_db if startTime <= e.startTime <= endTime]
+    filtered_feelings = [f.dict() for f in feelings_db if startTime <= f.datetime <= endTime]
+
+    if not filtered_events and not filtered_feelings:
+        return "Not enough data to generate advice."
+
+    return generate_advice(filtered_events, filtered_feelings)
