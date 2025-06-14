@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'event.dart';
+import 'bottom_sheet.dart';
 
 class StartScreen extends StatefulWidget {
   const StartScreen({super.key});
@@ -51,7 +52,16 @@ class _StartScreenState extends State<StartScreen> {
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: const Text('→ click for advice'),
-                          onTap: () {}, // TODO: Implement advice per event
+                          onTap: () {
+                            showModalBottomSheet(
+                              context: context,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                              ),
+                              isScrollControlled: true,
+                              builder: (context) => EventBottomSheet(event: event),
+                            );
+                          },
                         ),
                       )),
                 ],
