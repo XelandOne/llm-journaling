@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 from fastapi import Depends
 
 
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(title="LifeChat API", description="API for logging and analyzing life events and feelings.", version="1.0.0")
 
 
@@ -59,3 +61,7 @@ def add_event(description: str, db: Session = Depends(get_db)):
 #         return "Not enough data to generate advice."
 
 #     return generate_advice(filtered_events, filtered_feelings)
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
