@@ -23,6 +23,7 @@ def call_mistral(messages, model="mistral-large-latest"):
                aci.functions.get_definition("GOOGLE_CALENDAR__EVENTS_INSERT")
                ],
         tool_choice="required",
+        max_tokens=200,
         # parallel_tool_calls = True
     )
     tool_call = (
