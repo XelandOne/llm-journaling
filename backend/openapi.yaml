@@ -67,6 +67,57 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Feeling'
+  /getEvents:
+    get:
+      summary: Get events between two datetimes.
+      parameters:
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: List of events.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+  /getFeelings:
+    get:
+      summary: Get feelings between two datetimes.
+      parameters:
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: List of feelings.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Feeling'
+
   /getAdvice:
     get:
       summary: Get advice based on a date range
