@@ -55,7 +55,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Let's chat about",
+                  "Let's chat ...",
                   style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Container(
@@ -93,7 +93,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               ),
             ),
             const SizedBox(height: 24),
-            Text('Chat', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+            Text('What\'s going on in your life?', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             Card(
               elevation: 3,
