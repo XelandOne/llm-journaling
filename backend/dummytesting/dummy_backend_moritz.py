@@ -30,6 +30,7 @@ class Event(BaseModel):
     endTime: str
     description: str
     tags: List[str]
+    name: str
 
 
 class Feeling(BaseModel):
@@ -39,16 +40,75 @@ class Feeling(BaseModel):
 
 
 # --- Dummy Data Generation ---
+ACTIVITY_NAMES = [
+    "Team Meeting",
+    "Client Call",
+    "Code Review",
+    "Project Work",
+    "Presentation Preparation",
+    "Workout Session",
+    "Grocery Shopping",
+    "Study Session",
+    "Meditation",
+    "Dinner with Friends",
+    "Strategy Planning",
+    "Weekly Review",
+    "Family Time",
+    "Travel Planning",
+    "Doctor Appointment",
+    "Running",
+    "Reading Session",
+    "Online Course",
+    "Birthday Celebration",
+    "Networking Event"
+]
+
 TAGS = [
     "work",
-    "social",
+    "work",
+    "work",
+    "work",
+    "work",
     "health",
     "personal",
+    "education",
+    "health",
+    "social",
+    "planning",
+    "planning",
     "family",
     "travel",
+    "health",
+    "health",
+    "personal",
     "education",
-    "other",
+    "social",
+    "social"
 ]
+
+ACTIVITY_DESCRIPTION = [
+    "Attend a scheduled meeting with the team to discuss project updates and tasks.",
+    "Communicate with clients to gather feedback or discuss ongoing projects.",
+    "Review and improve codebase for current development tasks.",
+    "Focus on implementing project tasks and developing new features.",
+    "Prepare slides and materials for the upcoming presentation.",
+    "Complete a full workout session for physical health and fitness.",
+    "Purchase groceries and household items for the week.",
+    "Spend time studying course materials for academic progress.",
+    "Relax and reset the mind with a meditation session.",
+    "Enjoy an evening meal with friends to socialize and unwind.",
+    "Plan strategies for upcoming projects and set clear goals.",
+    "Review weekly progress and plan next week’s priorities.",
+    "Spend quality time with family members at home or on outings.",
+    "Organize travel arrangements for upcoming trips or vacations.",
+    "Attend a scheduled doctor's appointment for regular health checkups.",
+    "Go for a run to improve endurance and physical condition.",
+    "Read a book or articles to expand knowledge and relax.",
+    "Complete modules in an online course to learn new skills.",
+    "Celebrate a birthday with friends or family.",
+    "Attend a networking event to connect with new people professionally."
+]
+
 FEELINGS = [
     "calm",
     "motivated",
@@ -70,34 +130,23 @@ END_DATE = datetime(2025, 7, 1)
 import random
 from datetime import timedelta
 
-ACTIVITIES = [
-    "Team Meeting",
-    "Project Work",
-    "Client Call",
-    "Code Review",
-    "Presentation Preparation",
-    "Workout Session",
-    "Grocery Shopping",
-    "Study Session",
-    "Meditation",
-    "Dinner with Friends",
-    "Strategy Planning",
-    "Weekly Review",
-]
+
 
 def generate_dummy_events():
     events = []
     for i in range((END_DATE - START_DATE).days):
         day = START_DATE + timedelta(days=i)
-        num_events = random.randint(1, 3)  # 1-3 events pro Tag
+        num_events = random.randint(3, 5)  # 1-3 events pro Tag
 
         for j in range(num_events):
             start_hour = random.randint(7, 17)
             start = day + timedelta(hours=start_hour)
             end = start + timedelta(hours=1)
 
-            description = random.choice(ACTIVITIES)
-            tag = random.choice(TAGS)
+            i = random.randint(0, len(ACTIVITY_NAMES) - 1)
+            name = ACTIVITY_NAMES[i]
+            description = ACTIVITY_DESCRIPTION[i]
+            tag = TAGS[i]
 
             events.append(
                 Event(
@@ -106,6 +155,7 @@ def generate_dummy_events():
                     endTime=end.isoformat(),
                     description=description,
                     tags=[tag],
+                    name=name,
                 )
             )
     return events
