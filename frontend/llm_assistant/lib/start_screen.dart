@@ -92,7 +92,16 @@ class _StartScreenState extends State<StartScreen> {
                 color: Colors.grey.shade100,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text(snapshot.data ?? '', style: Theme.of(context).textTheme.bodyLarge),
+                  // Markdown kasten
+                  child: MarkdownBody(
+                    data: snapshot.data ?? '',
+                    styleSheet: MarkdownStyleSheet(
+                      p: Theme.of(context).textTheme.bodyLarge,
+                      h1: Theme.of(context).textTheme.headlineSmall,
+                      h2: Theme.of(context).textTheme.titleLarge,
+                      strong: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
               );
             },

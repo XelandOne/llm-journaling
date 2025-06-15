@@ -4,6 +4,8 @@ from typing import List, Optional
 from datetime import datetime, timedelta
 from fastapi.middleware.cors import CORSMiddleware
 from dummy_mistral import generate_advice
+from backend.voice import text_to_speech_stream
+from fastapi.responses import StreamingResponse
 
 #from mistral import extract_event_and_feeling
 
@@ -98,7 +100,7 @@ ACTIVITY_DESCRIPTION = [
     "Relax and reset the mind with a meditation session.",
     "Enjoy an evening meal with friends to socialize and unwind.",
     "Plan strategies for upcoming projects and set clear goals.",
-    "Review weekly progress and plan next week’s priorities.",
+    "Review weekly progress and plan next week's priorities.",
     "Spend quality time with family members at home or on outings.",
     "Organize travel arrangements for upcoming trips or vacations.",
     "Attend a scheduled doctor's appointment for regular health checkups.",
@@ -136,7 +138,7 @@ def generate_dummy_events():
     events = []
     for i in range((END_DATE - START_DATE).days):
         day = START_DATE + timedelta(days=i)
-        num_events = random.randint(3, 5)  # 1-3 events pro Tag
+        num_events = random.randint(3, 3)  # 1-3 events pro Tag
 
         for j in range(num_events):
             start_hour = random.randint(7, 17)
@@ -195,7 +197,7 @@ def get_events(startTime: str = Query(...), endTime: str = Query(...)):
     start = datetime.fromisoformat(startTime)
     end = datetime.fromisoformat(endTime)
     return [
-        e for e in DUMMY_EVENTS if start <= datetime.fromisoformat(e.startTime) < end
+        e.model_dump() for e in DUMMY_EVENTS if start <= datetime.fromisoformat(e.startTime) < end
     ]
 
 
@@ -231,6 +233,37 @@ def get_advice(startTime: str = Query(...), endTime: str = Query(...)):
     advice = generate_advice(events, feelings)
 
     return advice
+
+
+@app.get("/getMotivationalSpeech")
+def get_motivational_speech(startTime: str = Query(...), endTime: str = Query(...)):
+    start = datetime.fromisoformat(startTime)
+    end = datetime.fromisoformat(endTime)
+
+    # Filter events and feelings
+    events = [
+        e.model_dump() for e in DUMMY_EVENTS if start <= datetime.fromisoformat(e.startTime) < end
+    ]
+    feelings = [
+        f.model_dump() for f in DUMMY_FEELINGS if start <= datetime.fromisoformat(f.datetime) < end
+    ]
+
+    # If no data, return a default motivational message
+    if not events and not feelings:
+        text = "No data for this period. Keep going and log more events and feelings to get personalized motivation!"
+    else:
+        # Generate advice using Mistral
+        text = generate_advice(events, feelings)
+
+    # Convert text to speech
+    audio_stream = text_to_speech_stream(text)
+    
+    # Return the audio stream
+    return StreamingResponse(
+        audio_stream,
+        media_type="audio/mpeg",
+        headers={"Content-Disposition": "attachment; filename=motivational_speech.mp3"}
+    )
 
 if __name__ == "__main__":
     import uvicorn
