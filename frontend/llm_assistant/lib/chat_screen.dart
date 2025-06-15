@@ -155,13 +155,7 @@ class _ChatScreenState extends State<ChatScreen> {
               const SizedBox(height: 32),
             ],
             _chatHistory.isEmpty
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text('- Feeling detected'),
-                      Text('- Event detected'),
-                    ],
-                  )
+                ? const SizedBox.shrink()
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: _chatHistory.map((resp) => Padding(
