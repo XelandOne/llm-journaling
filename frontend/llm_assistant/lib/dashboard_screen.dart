@@ -5,10 +5,7 @@ import 'api_service.dart';
 import 'feeling.dart';
 import 'dart:math';
 import 'package:cupertino_icons/cupertino_icons.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'dart:typed_data';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+import 'audio_service.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -19,45 +16,29 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final ApiService apiService = ApiService();
+  final AudioService audioService = AudioService();
   late Future<List<Feeling>> _feelingsFuture;
   late Future<String> _aiFeedbackFuture;
-  final AudioPlayer _audioPlayer = AudioPlayer();
-  bool _isPlaying = false;
+  late Future<void> _preloadAudioFuture;
 
   @override
   void initState() {
     super.initState();
     _feelingsFuture = apiService.getFeelingsLastWeek();
     _aiFeedbackFuture = apiService.getAiFeedbackLastWeek();
+    // Start preloading the audio immediately
+    _preloadAudioFuture = audioService.preloadMotivationalSpeech();
   }
 
-  @override
-  void dispose() {
-    _audioPlayer.dispose();
-    super.dispose();
-  }
-
-  Future<void> _playMotivationalSpeech() async {
+  Future<void> _handleMotivationalSpeech() async {
     try {
-      setState(() => _isPlaying = true);
-      
-      // Get the audio data
-      final audioData = await apiService.getMotivationalSpeechLastWeek();
-      
-      // Save to temporary file
-      final tempDir = await getTemporaryDirectory();
-      final tempFile = File('${tempDir.path}/motivational_speech.mp3');
-      await tempFile.writeAsBytes(audioData);
-      
-      // Play the audio
-      await _audioPlayer.play(DeviceFileSource(tempFile.path));
-      
-      // Listen for completion
-      _audioPlayer.onPlayerComplete.listen((_) {
-        setState(() => _isPlaying = false);
-      });
+      if (audioService.isPlaying) {
+        await audioService.pauseMotivationalSpeech();
+      } else {
+        await audioService.playMotivationalSpeech();
+      }
+      setState(() {}); // Update UI to reflect playing state
     } catch (e) {
-      setState(() => _isPlaying = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error playing motivational speech: $e')),
@@ -147,14 +128,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('AI Feedback', style: Theme.of(context).textTheme.headlineMedium),
-                ElevatedButton.icon(
-                  onPressed: _isPlaying ? null : _playMotivationalSpeech,
-                  icon: Icon(_isPlaying ? CupertinoIcons.pause_fill : CupertinoIcons.play_fill),
-                  label: Text(_isPlaying ? 'Playing...' : 'Play Motivational Speech'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  ),
+                FutureBuilder<void>(
+                  future: _preloadAudioFuture,
+                  builder: (context, snapshot) {
+                    final isLoading = snapshot.connectionState == ConnectionState.waiting;
+                    final hasError = snapshot.hasError;
+                    
+                    return ElevatedButton.icon(
+                      onPressed: hasError ? null : _handleMotivationalSpeech,
+                      icon: Icon(
+                        isLoading 
+                          ? CupertinoIcons.arrow_clockwise 
+                          : (audioService.isPlaying 
+                              ? CupertinoIcons.pause_fill 
+                              : CupertinoIcons.play_fill)
+                      ),
+                      label: Text(
+                        isLoading 
+                          ? 'Loading...' 
+                          : (audioService.isPlaying 
+                              ? 'Pause Speech' 
+                              : 'Play Motivational Speech')
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
