@@ -18,13 +18,11 @@ def call_mistral(messages, model="mistral-large-latest"):
     response = client.chat.complete(
         model=model,
         messages=messages,
-        # response_format={"type": "json_object"},
-        tools=[#aci.functions.get_definition("GOOGLE_CALENDAR__EVENTS_LIST"),
+        tools=[
                aci.functions.get_definition("GOOGLE_CALENDAR__EVENTS_INSERT")
                ],
         tool_choice="required",
-        max_tokens=200,
-        # parallel_tool_calls = True
+        max_tokens=200,  # Increased token limit
     )
     tool_call = (
         response.choices[0].message.tool_calls[0]
@@ -39,7 +37,12 @@ def call_mistral(messages, model="mistral-large-latest"):
             linked_account_owner_id=os.getenv("LINKED_ACCOUNT_OWNER_ID", "")
         )
         print(result)
-    return response.choices[0].message.content
+    
+    # Clean up the response content by removing quotes if present
+    content = response.choices[0].message.content
+    if content.startswith('"') and content.endswith('"'):
+        content = content[1:-1]
+    return content
 
 def extract_event_and_feeling(chat: str) -> dict:
     system = {
@@ -62,20 +65,46 @@ def generate_advice(events: list, feelings: list) -> str:
         "content": """You are a kind, thoughtful life coach.
         """,
     }
+
+    prompt = f"""
+    Here are the user's events:
+    {json.dumps(events, indent=2)}
+    
+    Please provide personal, supportive advice.
+    Provide advice based on events. 
+    Please return some advices for the user to achieve their goals.
+    Please return a list of advices of maximum 3.
+    Do not preamble. Just return the advices.
+"""
+
+    
+    messages = [system, {"role": "You are a life coach and you are helping the user to achieve their deadlines.", "content": prompt}]
+
+    chat_response = client.chat.complete(
+            model="mistral-large-latest",
+            messages=messages,
+            temperature=0.3,
+            max_tokens=100
+        )
+    return chat_response.choices[0].message.content
+
+
+def generate_advice_from_feeling(feeling: str) -> str:
+    system = {
+        "role": "system",
+        "content": """You are a kind, thoughtful life coach.
+        """,
+    }
     user = {
         "role": "user",
         "content": f"""
-    Here are the user's events:
-    {json.dumps(events, indent=2)}
-
-    Here are the user's feelings:
-    {json.dumps(feelings, indent=2)}
+    Here is the user's feeling:
+    {feeling}
 
     Please provide personal, supportive advice.
-    Provide advice based on events and emotional states. 
+    Provide advice based on the feeling. 
     Please return some advices for the user to achieve their goals.
     Please return a list of advices of maximum 3.
-    Do not preamble. Just return the list of advices.
+    Do not preamble. Just return the advices.
     """,
     }
-    return call_mistral([system, user], temperature=0.3)
