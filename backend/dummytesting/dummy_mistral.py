@@ -62,28 +62,27 @@ def extract_event_and_feeling(chat: str) -> dict:
     return json.loads(response)
 
 
-def generate_advice(events: list, feelings: list) -> str:
-    system = {
-        "role": "system",
-        "content": """You are a kind, thoughtful life coach.
-        """,
-    }
-    user = {
-        "role": "user",
-        "content": f"""
+#def generate_advice(events: list, feelings: list) -> str:
+def generate_advice(events: list) -> str:
+    prompt = f"""
     Here are the user's events:
     {json.dumps(events, indent=2)}
-
-    Here are the user's feelings:
-    {json.dumps(feelings, indent=2)}
-
+    
     Please provide personal, supportive advice.
-    Provide advice based on events and emotional states. 
+    Provide advice based on events. 
     Please return some advices for the user to achieve their goals.
-    Please return a 50 tokens output. You should give the user some cool advice!
-    Do not preamble. Just return the list of advices.
-    Do not use any markdown character, just plain text please! Also never use new line characters!
+    Please return a list of advices of maximum 3.
+    Format your response in markdown for each advice.
+    Do not preamble. Just return the advices.
+    Return concise and short advices.
+    """
 
-    """,
-    }
-    return call_mistral([system, user], temperature=0.3)
+    messages = [{"role": "system", "content": "You are a life coach and you are helping the user to achieve their deadlines. Always format your responses in markdown."}, {"role": "user", "content": prompt}]
+
+    chat_response = client.chat.complete(
+            model="mistral-large-latest",
+            messages=messages,
+            temperature=0.3,
+            max_tokens=500
+        )
+    return chat_response.choices[0].message.content

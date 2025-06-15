@@ -7,7 +7,7 @@ import pytz
 from mistralai import Mistral
 from dotenv import load_dotenv
 
-from gcal import aci
+# from gcal import aci
 
 load_dotenv()
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "xxx")
@@ -59,7 +59,7 @@ def extract_event_and_feeling(chat: str) -> dict:
     response = call_mistral([system, user])
     return json.loads(response)
 
-def generate_advice(events: list, feelings: list) -> str:
+def generate_advice(events: list) -> str:
     prompt = f"""
     Here are the user's events:
     {json.dumps(events, indent=2)}
@@ -104,3 +104,10 @@ def generate_advice_from_feeling(feeling: str) -> str:
     """,
     }
     return call_mistral([system, user], model="mistral-large-latest", max_tokens=500)
+
+
+if __name__ == "__main__":
+    from dummytesting.dummy_backend_moritz import generate_dummy_events
+    events = generate_dummy_events()
+
+    print(generate_advice(events=events))
