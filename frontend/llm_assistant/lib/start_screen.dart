@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'event.dart';
 import 'bottom_sheet.dart';
-import 'package:cupertino_icons/cupertino_icons.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class StartScreen extends StatefulWidget {
   const StartScreen({super.key});
@@ -28,7 +28,7 @@ class _StartScreenState extends State<StartScreen> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 60.0, bottom: 20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -92,7 +92,16 @@ class _StartScreenState extends State<StartScreen> {
                 color: Colors.grey.shade100,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text(snapshot.data ?? '', style: Theme.of(context).textTheme.bodyLarge),
+                  // Markdown kasten
+                  child: MarkdownBody(
+                    data: snapshot.data ?? '',
+                    styleSheet: MarkdownStyleSheet(
+                      p: Theme.of(context).textTheme.bodyLarge,
+                      h1: Theme.of(context).textTheme.headlineSmall,
+                      h2: Theme.of(context).textTheme.titleLarge,
+                      strong: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
               );
             },

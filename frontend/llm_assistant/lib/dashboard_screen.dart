@@ -1,9 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'api_service.dart';
 import 'feeling.dart';
 import 'dart:math';
 import 'package:cupertino_icons/cupertino_icons.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'dart:typed_data';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -16,6 +21,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final ApiService apiService = ApiService();
   late Future<List<Feeling>> _feelingsFuture;
   late Future<String> _aiFeedbackFuture;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isPlaying = false;
 
   @override
   void initState() {
@@ -25,9 +32,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  Future<void> _playMotivationalSpeech() async {
+    try {
+      setState(() => _isPlaying = true);
+      
+      // Get the audio data
+      final audioData = await apiService.getMotivationalSpeechLastWeek();
+      
+      // Save to temporary file
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File('${tempDir.path}/motivational_speech.mp3');
+      await tempFile.writeAsBytes(audioData);
+      
+      // Play the audio
+      await _audioPlayer.play(DeviceFileSource(tempFile.path));
+      
+      // Listen for completion
+      _audioPlayer.onPlayerComplete.listen((_) {
+        setState(() => _isPlaying = false);
+      });
+    } catch (e) {
+      setState(() => _isPlaying = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error playing motivational speech: $e')),
+        );
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 60.0, bottom: 20.0),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,7 +143,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             const SizedBox(height: 32),
-            Text('AI Feedback', style: Theme.of(context).textTheme.headlineMedium),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('AI Feedback', style: Theme.of(context).textTheme.headlineMedium),
+                ElevatedButton.icon(
+                  onPressed: _isPlaying ? null : _playMotivationalSpeech,
+                  icon: Icon(_isPlaying ? CupertinoIcons.pause_fill : CupertinoIcons.play_fill),
+                  label: Text(_isPlaying ? 'Playing...' : 'Play Motivational Speech'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+              ],
+            ),
             Divider(thickness: 1, color: Colors.grey.shade200),
             const SizedBox(height: 8),
             FutureBuilder<String>(
@@ -118,7 +174,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   color: Colors.grey.shade100,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Text(snapshot.data ?? '', style: Theme.of(context).textTheme.bodyLarge),
+                    child: MarkdownBody(
+                      data: snapshot.data ?? '',
+                      styleSheet: MarkdownStyleSheet(
+                        p: Theme.of(context).textTheme.bodyLarge,
+                        h1: Theme.of(context).textTheme.headlineSmall,
+                        h2: Theme.of(context).textTheme.titleLarge,
+                        strong: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
                 );
               },

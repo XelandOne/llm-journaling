@@ -7,22 +7,26 @@ import pytz
 from mistralai import Mistral
 from dotenv import load_dotenv
 
-from gcal import aci
+# from gcal import aci
 
 load_dotenv()
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "xxx")
 
 client = Mistral(api_key=MISTRAL_API_KEY)
 
-def call_mistral(messages, model="mistral-large-latest"):
+
+def call_mistral(messages, model="mistral-large-latest", temperature=0.7):
     response = client.chat.complete(
         model=model,
         messages=messages,
-        tools=[
-               aci.functions.get_definition("GOOGLE_CALENDAR__EVENTS_INSERT")
-               ],
-        tool_choice="required",
-        max_tokens=200,  # Increased token limit
+        temperature=temperature,
+        max_tokens=50,
+        # response_format={"type": "json_object"},
+        # tools=[#aci.functions.get_definition("GOOGLE_CALENDAR__EVENTS_LIST"),
+        # aci.functions.get_definition("GOOGLE_CALENDAR__EVENTS_INSERT")
+        #       ],
+        # tool_choice="required",
+        # parallel_tool_calls = True
     )
     tool_call = (
         response.choices[0].message.tool_calls[0]
@@ -31,18 +35,16 @@ def call_mistral(messages, model="mistral-large-latest"):
     )
 
     if tool_call:
-        result = aci.handle_function_call(
-            tool_call.function.name,
-            json.loads(tool_call.function.arguments),
-            linked_account_owner_id=os.getenv("LINKED_ACCOUNT_OWNER_ID", "")
-        )
-        print(result)
-    
-    # Clean up the response content by removing quotes if present
-    content = response.choices[0].message.content
-    if content.startswith('"') and content.endswith('"'):
-        content = content[1:-1]
-    return content
+        #        result = aci.handle_function_call(
+        #           tool_call.function.name,
+        #          json.loads(tool_call.function.arguments),
+        #         linked_account_owner_id=os.getenv("LINKED_ACCOUNT_OWNER_ID", "")
+        #    )
+        #   print(result)
+        return response.choices[0].message.content
+    # If no tool_call, return content directly (for advice)
+    return response.choices[0].message.content
+
 
 def extract_event_and_feeling(chat: str) -> dict:
     system = {
@@ -59,7 +61,7 @@ def extract_event_and_feeling(chat: str) -> dict:
     response = call_mistral([system, user])
     return json.loads(response)
 
-def generate_advice(events: list) -> str:
+def generate_advice(events: list, feelings: list) -> str:    
     prompt = f"""
     Here are the user's events:
     {json.dumps(events, indent=2)}
@@ -68,7 +70,7 @@ def generate_advice(events: list) -> str:
     Provide advice based on events. 
     Please return some advices for the user to achieve their goals.
     Please return a list of advices of maximum 3.
-    Format your response in markdown for each advice.
+    IMPORTANT: Format the response in a single line with no newlines. Use bold for each advice.
     Do not preamble. Just return the advices.
     Return concise and short advices.
     """
@@ -79,35 +81,6 @@ def generate_advice(events: list) -> str:
             model="mistral-large-latest",
             messages=messages,
             temperature=0.3,
-            max_tokens=500
+            max_tokens=100
         )
     return chat_response.choices[0].message.content
-
-
-def generate_advice_from_feeling(feeling: str) -> str:
-    system = {
-        "role": "system",
-        "content": """You are a kind, thoughtful life coach. Always format your responses in markdown.""",
-    }
-    user = {
-        "role": "user",
-        "content": f"""
-    Here is the user's feeling:
-    {feeling}
-
-    Please provide personal, supportive advice.
-    Provide advice based on the feeling. 
-    Please return some advices for the user to achieve their goals.
-    Please return a list of advices of maximum 3.
-    Format your response in markdown with each advice as a bullet point.
-    Do not preamble. Just return the advices.
-    """,
-    }
-    return call_mistral([system, user], model="mistral-large-latest", max_tokens=500)
-
-
-if __name__ == "__main__":
-    from dummytesting.dummy_backend_moritz import generate_dummy_events
-    events = generate_dummy_events()
-
-    print(generate_advice(events=events))
