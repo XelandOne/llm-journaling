@@ -129,31 +129,11 @@ def generate_dummy_events():
     events.append(
         Event(
             date=day.strftime("%Y-%m-%d"),
-            startTime=datetime(2025, 6, 15, 8, 0).isoformat(),
-            endTime=datetime(2025, 6, 15, 9, 0).isoformat(),
-            description="Team brainstorming session to generate ideas for the presentation.",
-            tags=["work", "planning"],
-            name="Brainstorming for pres"
-        )
-    )
-    events.append(
-        Event(
-            date=day.strftime("%Y-%m-%d"),
             startTime=datetime(2025, 6, 15, 9, 0).isoformat(),
             endTime=datetime(2025, 6, 15, 11, 0).isoformat(),
             description="Hands-on session to prototype and build initial solutions.",
             tags=["work", "development"],
             name="Prototyping"
-        )
-    )
-    events.append(
-        Event(
-            date=day.strftime("%Y-%m-%d"),
-            startTime=datetime(2025, 6, 15, 11, 0).isoformat(),
-            endTime=datetime(2025, 6, 15, 13, 0).isoformat(),
-            description="Finalize and complete all features required for the hackathon project.",
-            tags=["work", "development"],
-            name="Complete features for Hackathon"
         )
     )
     events.append(
