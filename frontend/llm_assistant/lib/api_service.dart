@@ -97,4 +97,13 @@ class ApiService {
       throw Exception('Failed to load motivational speech');
     }
   }
+
+  Future<String> getEventAdvice(Event event) async {
+    final response = await http.get(Uri.parse('$baseUrl/getAdvice?startTime=${event.startTime}&endTime=${event.endTime}'));
+    if (response.statusCode == 200) {
+      return decodeEscapedNewlines(trimQuotes(response.body));
+    } else {
+      throw Exception('Failed to load event advice');
+    }
+  }
 } 
