@@ -4,6 +4,7 @@ from typing import List, Optional
 from datetime import datetime, timedelta
 from fastapi.middleware.cors import CORSMiddleware
 from dummy_mistral import generate_advice
+from dummy_mistral import generate_motivation
 from backend.voice import text_to_speech_stream
 from fastapi.responses import StreamingResponse
 
@@ -253,7 +254,7 @@ def get_motivational_speech(startTime: str = Query(...), endTime: str = Query(..
         text = "No data for this period. Keep going and log more events and feelings to get personalized motivation!"
     else:
         # Generate advice using Mistral
-        text = generate_advice(events, feelings)
+        text = generate_motivation(events, feelings)
 
     # Convert text to speech
     audio_stream = text_to_speech_stream(text)

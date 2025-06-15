@@ -44,6 +44,15 @@ def text_to_speech_stream(text: str) -> IO[bytes]:
 
     return audio_stream
 
+def motivational_speech(text: str) -> IO[bytes]:
+    response = elevenlabs.text_to_speech.stream(
+        voice_id="pNInz6obpgDQGcFmaJgB", # Adam pre-made voice
+        output_format="mp3_22050_32",
+        text=text,
+        model_id="eleven_multilingual_v2",
+    )
+
+
 
 def speech_to_text(audio_stream: IO[bytes]) -> str:
     response = elevenlabs.speech_to_text.convert(

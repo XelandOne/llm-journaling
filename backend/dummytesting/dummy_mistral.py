@@ -84,3 +84,23 @@ def generate_advice(events: list, feelings: list) -> str:
             max_tokens=100
         )
     return chat_response.choices[0].message.content
+
+def generate_motivation(events: list, feelings: list) -> str:
+    prompt = f"""
+    You are a motivation coach.
+    Return a 3 motivational quotes based on the user's events and feelings.
+    Events: {json.dumps(events, indent=2)}
+    Feelings: {json.dumps(feelings, indent=2)}
+    Do not preamble. Just return the quotes.
+    Return concise and short quotes.
+    """
+
+    messages = [{"role": "system", "content": "You are a motivation coach. Return 3 motivational quotes based on the user's events and feelings."}, {"role": "user", "content": prompt}]
+    
+    chat_response = client.chat.complete(
+            model="mistral-large-latest",
+            messages=messages,
+            temperature=0.3,
+            max_tokens=100
+        )
+    return chat_response.choices[0].message.content
