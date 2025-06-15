@@ -3,6 +3,10 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime, timedelta
 from fastapi.middleware.cors import CORSMiddleware
+from mistral import generate_advice
+from mistral import generate_motivation
+from voice import text_to_speech_stream
+from fastapi.responses import StreamingResponse
 
 from mistral import extract_event_and_feeling
 
@@ -29,6 +33,7 @@ class Event(BaseModel):
     endTime: str
     description: str
     tags: List[str]
+    name: str
 
 
 class Feeling(BaseModel):
@@ -38,16 +43,75 @@ class Feeling(BaseModel):
 
 
 # --- Dummy Data Generation ---
+ACTIVITY_NAMES = [
+    "Team Meeting",
+    "Client Call",
+    "Code Review",
+    "Project Work",
+    "Presentation Preparation",
+    "Workout Session",
+    "Grocery Shopping",
+    "Study Session",
+    "Meditation",
+    "Dinner with Friends",
+    "Strategy Planning",
+    "Weekly Review",
+    "Family Time",
+    "Travel Planning",
+    "Doctor Appointment",
+    "Running",
+    "Reading Session",
+    "Online Course",
+    "Birthday Celebration",
+    "Networking Event"
+]
+
 TAGS = [
     "work",
-    "social",
+    "work",
+    "work",
+    "work",
+    "work",
     "health",
     "personal",
+    "education",
+    "health",
+    "social",
+    "planning",
+    "planning",
     "family",
     "travel",
+    "health",
+    "health",
+    "personal",
     "education",
-    "other",
+    "social",
+    "social"
 ]
+
+ACTIVITY_DESCRIPTION = [
+    "Attend a scheduled meeting with the team to discuss project updates and tasks.",
+    "Communicate with clients to gather feedback or discuss ongoing projects.",
+    "Review and improve codebase for current development tasks.",
+    "Focus on implementing project tasks and developing new features.",
+    "Prepare slides and materials for the upcoming presentation.",
+    "Complete a full workout session for physical health and fitness.",
+    "Purchase groceries and household items for the week.",
+    "Spend time studying course materials for academic progress.",
+    "Relax and reset the mind with a meditation session.",
+    "Enjoy an evening meal with friends to socialize and unwind.",
+    "Plan strategies for upcoming projects and set clear goals.",
+    "Review weekly progress and plan next week's priorities.",
+    "Spend quality time with family members at home or on outings.",
+    "Organize travel arrangements for upcoming trips or vacations.",
+    "Attend a scheduled doctor's appointment for regular health checkups.",
+    "Go for a run to improve endurance and physical condition.",
+    "Read a book or articles to expand knowledge and relax.",
+    "Complete modules in an online course to learn new skills.",
+    "Celebrate a birthday with friends or family.",
+    "Attend a networking event to connect with new people professionally."
+]
+
 FEELINGS = [
     "calm",
     "motivated",
@@ -66,21 +130,35 @@ END_DATE = datetime(2025, 7, 1)
 
 
 # Generate dummy events and feelings for each day in the range
+import random
+from datetime import timedelta
+
+
+
 def generate_dummy_events():
     events = []
     for i in range((END_DATE - START_DATE).days):
         day = START_DATE + timedelta(days=i)
-        # 1-2 events per day
-        for j in range(1, 3):
-            start = day + timedelta(hours=8 + j * 2)
+        num_events = random.randint(3, 3)  # 1-3 events pro Tag
+
+        for j in range(num_events):
+            start_hour = random.randint(7, 17)
+            start = day + timedelta(hours=start_hour)
             end = start + timedelta(hours=1)
+
+            i = random.randint(0, len(ACTIVITY_NAMES) - 1)
+            name = ACTIVITY_NAMES[i]
+            description = ACTIVITY_DESCRIPTION[i]
+            tag = TAGS[i]
+
             events.append(
                 Event(
                     date=day.strftime("%Y-%m-%d"),
                     startTime=start.isoformat(),
                     endTime=end.isoformat(),
-                    description=f"Dummy event {j} on {day.strftime('%Y-%m-%d')}",
-                    tags=[TAGS[(i + j) % len(TAGS)]],
+                    description=description,
+                    tags=[tag],
+                    name=name,
                 )
             )
     return events
@@ -104,6 +182,7 @@ def generate_dummy_feelings():
 
 
 DUMMY_EVENTS = generate_dummy_events()
+print(DUMMY_EVENTS)
 DUMMY_FEELINGS = generate_dummy_feelings()
 
 
@@ -119,7 +198,7 @@ def get_events(startTime: str = Query(...), endTime: str = Query(...)):
     start = datetime.fromisoformat(startTime)
     end = datetime.fromisoformat(endTime)
     return [
-        e for e in DUMMY_EVENTS if start <= datetime.fromisoformat(e.startTime) < end
+        e.model_dump() for e in DUMMY_EVENTS if start <= datetime.fromisoformat(e.startTime) < end
     ]
 
 
@@ -134,25 +213,58 @@ def get_feelings(startTime: str = Query(...), endTime: str = Query(...)):
 
 @app.get("/getAdvice", response_model=str)
 def get_advice(startTime: str = Query(...), endTime: str = Query(...)):
-    # Dummy advice based on the number of events/feelings in the range
     start = datetime.fromisoformat(startTime)
     end = datetime.fromisoformat(endTime)
+
+    # Filtere die Dummy Events
     events = [
-        e for e in DUMMY_EVENTS if start <= datetime.fromisoformat(e.startTime) < end
+        e.model_dump() for e in DUMMY_EVENTS if start <= datetime.fromisoformat(e.startTime) < end
     ]
+
+    # Filtere die Dummy Feelings
     feelings = [
-        f for f in DUMMY_FEELINGS if start <= datetime.fromisoformat(f.datetime) < end
+        f.model_dump() for f in DUMMY_FEELINGS if start <= datetime.fromisoformat(f.datetime) < end
     ]
+
+    # Falls keine Daten vorhanden, gib kurze Message zurück
     if not events and not feelings:
         return "No data for this period. Try to log more events and feelings!"
-    avg_score = sum(f.score for f in feelings) / len(feelings) if feelings else 5
-    if avg_score > 7:
-        return "You seem to be doing great! Keep up the positive energy."
-    elif avg_score > 4:
-        return "Things are going okay. Consider focusing on activities that make you happy."
-    else:
-        return "It looks like you've had a tough time. Reach out to friends or family, and take care of yourself."
 
+    # Generiere das AI-basierte Advice mit Mistral
+    advice = generate_advice(events, feelings)
+
+    return advice
+
+
+@app.get("/getMotivationalSpeech")
+def get_motivational_speech(startTime: str = Query(...), endTime: str = Query(...)):
+    start = datetime.fromisoformat(startTime)
+    end = datetime.fromisoformat(endTime)
+
+    # Filter events and feelings
+    events = [
+        e.model_dump() for e in DUMMY_EVENTS if start <= datetime.fromisoformat(e.startTime) < end
+    ]
+    feelings = [
+        f.model_dump() for f in DUMMY_FEELINGS if start <= datetime.fromisoformat(f.datetime) < end
+    ]
+
+    # If no data, return a default motivational message
+    if not events and not feelings:
+        text = "No data for this period. Keep going and log more events and feelings to get personalized motivation!"
+    else:
+        # Generate advice using Mistral
+        text = generate_motivation(events, feelings)
+
+    # Convert text to speech
+    audio_stream = text_to_speech_stream(text)
+
+    # Return the audio stream
+    return StreamingResponse(
+        audio_stream,
+        media_type="audio/mpeg",
+        headers={"Content-Disposition": "attachment; filename=motivational_speech.mp3"}
+    )
 
 if __name__ == "__main__":
     import uvicorn
