@@ -7,7 +7,7 @@ import pytz
 from mistralai import Mistral
 from dotenv import load_dotenv
 
-# from gcal import aci
+from gcal import aci
 
 load_dotenv()
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "xxx")

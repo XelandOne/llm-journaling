@@ -61,9 +61,7 @@ def extract_event_and_feeling(chat: str) -> dict:
     response = call_mistral([system, user])
     return json.loads(response)
 
-
-#def generate_advice(events: list, feelings: list) -> str:
-def generate_advice(events: list) -> str:
+def generate_advice(events: list, feelings: list) -> str:    
     prompt = f"""
     Here are the user's events:
     {json.dumps(events, indent=2)}
