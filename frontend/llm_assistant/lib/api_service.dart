@@ -97,4 +97,26 @@ class ApiService {
       throw Exception('Failed to load motivational speech');
     }
   }
+
+  Future<String> getEventAdvice(Event event) async {
+    final response = await http.get(Uri.parse('$baseUrl/getAdvice?startTime=${event.startTime}&endTime=${event.endTime}'));
+    if (response.statusCode == 200) {
+      return decodeEscapedNewlines(trimQuotes(response.body));
+    } else {
+      throw Exception('Failed to load event advice');
+    }
+  }
+
+  Future<List<Event>> getEventsLastWeek() async {
+    final now = DateTime.now();
+    final start = now.subtract(const Duration(days: 7)).toIso8601String();
+    final end = now.toIso8601String();
+    final response = await http.get(Uri.parse('$baseUrl/getEvents?startTime=$start&endTime=$end'));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((e) => Event.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to load events');
+    }
+  }
 } 
