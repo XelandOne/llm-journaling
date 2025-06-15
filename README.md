@@ -25,7 +25,7 @@ TODO: add ui screenshots with core functionalities
 
 ## Set API keys
 
-# TODO: check api key names
+TODO: check api key names
 ``` bash
 export MISTRAL_API_KEY=
 export ELEVENLABS_API_KEY=
