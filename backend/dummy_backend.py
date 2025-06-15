@@ -124,30 +124,59 @@ from datetime import timedelta
 
 def generate_dummy_events():
     events = []
-    for i in range((END_DATE - START_DATE).days):
-        day = START_DATE + timedelta(days=i)
-        num_events = random.randint(3, 3)  # 1-3 events pro Tag
+    day = datetime(2025, 6, 15)
 
-        for j in range(num_events):
-            start_hour = random.randint(7, 17)
-            start = day + timedelta(hours=start_hour)
-            end = start + timedelta(hours=1)
+    events.append(
+        Event(
+            date=day.strftime("%Y-%m-%d"),
+            startTime=datetime(2025, 6, 15, 8, 0).isoformat(),
+            endTime=datetime(2025, 6, 15, 9, 0).isoformat(),
+            description="Team brainstorming session to generate ideas for the presentation.",
+            tags=["work", "planning"],
+            name="Brainstorming for pres"
+        )
+    )
+    events.append(
+        Event(
+            date=day.strftime("%Y-%m-%d"),
+            startTime=datetime(2025, 6, 15, 9, 0).isoformat(),
+            endTime=datetime(2025, 6, 15, 11, 0).isoformat(),
+            description="Hands-on session to prototype and build initial solutions.",
+            tags=["work", "development"],
+            name="Prototyping"
+        )
+    )
+    events.append(
+        Event(
+            date=day.strftime("%Y-%m-%d"),
+            startTime=datetime(2025, 6, 15, 11, 0).isoformat(),
+            endTime=datetime(2025, 6, 15, 13, 0).isoformat(),
+            description="Finalize and complete all features required for the hackathon project.",
+            tags=["work", "development"],
+            name="Complete features for Hackathon"
+        )
+    )
+    events.append(
+        Event(
+            date=day.strftime("%Y-%m-%d"),
+            startTime=datetime(2025, 6, 15, 13, 0).isoformat(),
+            endTime=datetime(2025, 6, 15, 14, 30).isoformat(),
+            description="Prepare and rehearse the pitch for the hackathon presentation.",
+            tags=["work", "presentation"],
+            name="Prepare for pitching"
+        )
+    )
+    events.append(
+        Event(
+            date=day.strftime("%Y-%m-%d"),
+            startTime=datetime(2025, 6, 15, 17, 0).isoformat(),
+            endTime=datetime(2025, 6, 15, 18, 0).isoformat(),
+            description="Final pitch presentations to judges and audience.",
+            tags=["work", "presentation"],
+            name="Pitches Final"
+        )
+    )
 
-            i = random.randint(0, len(ACTIVITY_NAMES) - 1)
-            name = ACTIVITY_NAMES[i]
-            description = ACTIVITY_DESCRIPTION[i]
-            tag = TAGS[i]
-
-            events.append(
-                Event(
-                    date=day.strftime("%Y-%m-%d"),
-                    startTime=start.isoformat(),
-                    endTime=end.isoformat(),
-                    description=description,
-                    tags=[tag],
-                    name=name,
-                )
-            )
     return events
 
 
