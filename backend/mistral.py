@@ -20,12 +20,20 @@ mistral_client = Mistral(api_key=MISTRAL_API_KEY)
 openai_client = OpenAI()
 
 def google_event_to_event(event_data) -> Event:
+    def strip_timezone(dt_str):
+        # Remove timezone info if present (e.g., 2024-06-13T10:00:00+02:00 or 2024-06-13T10:00:00Z)
+        if "+" in dt_str:
+            return dt_str.split("+")[0]
+        if "Z" in dt_str:
+            return dt_str.replace("Z", "")
+        return dt_str
+
     return Event(
         date=event_data["start"]["dateTime"][:10],
-        startTime=event_data["start"]["dateTime"],
-        endTime=event_data["end"]["dateTime"],
+        startTime=strip_timezone(event_data["start"]["dateTime"]),
+        endTime=strip_timezone(event_data["end"]["dateTime"]),
         description=event_data.get("summary", ""),
-        tags=["calendar"],  # Adjust if you have tags in event_data
+        tags=["calendar"],
         name=event_data.get("summary", ""),
     )
 
