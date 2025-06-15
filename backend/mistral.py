@@ -8,6 +8,7 @@ import pytz
 from aci.types.enums import FunctionDefinitionFormat
 from mistralai import Mistral
 from dotenv import load_dotenv
+from sqlalchemy.orm import Query
 
 from schemes import Event, Feeling
 from gcal import aci
@@ -137,6 +138,16 @@ def lifeChat(messages, model="gpt-4.1") -> Tuple[str, List[Event]]:
     )
     content = response.choices[0].message.content
     return content, created_events, created_feelings
+
+def get_events_google(startTime: str = Query(...), endTime: str = Query(...)):
+    start = datetime.fromisoformat(startTime)
+    end = datetime.fromisoformat(endTime)
+    response = aci.handle_function_call(
+        'GOOGLE_CALENDAR__EVENTS_LIST',
+        json.loads('{"path":{"calendarId":"primary"},"query":{"timeMin":"2025-06-15T00:00:00+02:00","timeMax":"2025-06-16T00:00:00+02:00","orderBy":"startTime","singleEvents":true,"timeZone":"Europe/Berlin"}}'),
+        linked_account_owner_id=os.getenv("LINKED_ACCOUNT_OWNER_ID", ""),
+    )
+    return response.json()
 
 def extract_event_and_feeling(chat: str) -> Tuple[Event, List[Event]]:
     system = {
