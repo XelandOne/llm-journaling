@@ -16,8 +16,8 @@ from openai import OpenAI
 load_dotenv()
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "xxx")
 
-# client = Mistral(api_key=MISTRAL_API_KEY)
-client = OpenAI()
+mistral_client = Mistral(api_key=MISTRAL_API_KEY)
+openai_client = OpenAI()
 
 def google_event_to_event(event_data) -> Event:
     return Event(
@@ -34,7 +34,7 @@ def lifeChat(messages, model="gpt-4.1") -> Tuple[str, List[Event]]:
         aci.functions.get_definition("GOOGLE_CALENDAR__EVENTS_INSERT"),
         aci.functions.get_definition("GOOGLE_CALENDAR__EVENTS_LIST"),
     ]
-    response = client.chat.completions.create(
+    response = openai_client.chat.completions.create(
         model=model,
         messages=messages,
         tools=tools,
@@ -77,7 +77,7 @@ def lifeChat(messages, model="gpt-4.1") -> Tuple[str, List[Event]]:
         "role": "user",
         "content": f"The request from the user: {messages[1]["content"]}",
     }
-    response = client.chat.completions.create(
+    response = openai_client.chat.completions.create(
         model=model,
         messages=messages,
     )
@@ -115,7 +115,7 @@ def generate_advice(events: list, feelings: list) -> str:
                  "content": "You are a life coach and you are helping the user to achieve their deadlines. Always format your responses in markdown."},
                 {"role": "user", "content": prompt}]
 
-    chat_response = client.chat.complete(
+    chat_response = mistral_client.chat.complete(
         model="mistral-large-latest",
         messages=messages,
         temperature=0.3,
@@ -138,7 +138,7 @@ def generate_motivation(events: list, feelings: list) -> str:
                  "content": "You are a motivation coach. Return 3 motivational quotes based on the user's events and feelings."},
                 {"role": "user", "content": prompt}]
 
-    chat_response = client.chat.complete(
+    chat_response = mistral_client.chat.complete(
         model="mistral-large-latest",
         messages=messages,
         temperature=0.3,
