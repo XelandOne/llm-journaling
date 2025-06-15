@@ -3,8 +3,8 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime, timedelta
 from fastapi.middleware.cors import CORSMiddleware
-from dummy_mistral import generate_advice
-from dummy_mistral import generate_motivation
+from mistral import generate_advice
+from mistral import generate_motivation
 from backend.voice import text_to_speech_stream
 from fastapi.responses import StreamingResponse
 
