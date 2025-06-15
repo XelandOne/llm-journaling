@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'api_service.dart';
 import 'feeling.dart';
-import 'dart:math';
-import 'package:cupertino_icons/cupertino_icons.dart';
 import 'audio_service.dart';
 
 class DashboardScreen extends StatefulWidget {
