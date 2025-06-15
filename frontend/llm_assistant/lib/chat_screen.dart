@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'chat_response.dart';
 import 'package:cupertino_icons/cupertino_icons.dart';
+import 'bottom_sheet.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -97,9 +98,62 @@ class _ChatScreenState extends State<ChatScreen> {
               Text(_error!, style: const TextStyle(color: Colors.red)),
             ],
             const SizedBox(height: 32),
-            Text('Detecting Log', style: Theme.of(context).textTheme.titleMedium),
-            Divider(thickness: 1, color: Colors.grey.shade200),
             const SizedBox(height: 8),
+            if (_chatHistory.isNotEmpty && _chatHistory.first.response != null) ...[
+              Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 1,
+                color: Colors.grey.shade100,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(_chatHistory.first.response!),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (_chatHistory.isNotEmpty && _chatHistory.first.createdEvents != null && _chatHistory.first.createdEvents!.isNotEmpty) ...[
+              Text('Created Events', style: Theme.of(context).textTheme.titleMedium),
+              Divider(thickness: 1, color: Colors.grey.shade200),
+              const SizedBox(height: 8),
+              Column(
+                children: _chatHistory.first.createdEvents!.map((event) => Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 2,
+                  child: ListTile(
+                    leading: Icon(CupertinoIcons.calendar, color: Theme.of(context).colorScheme.primary),
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _formatTime(event.startTime),
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          event.description,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          softWrap: true,
+                        ),
+                      ],
+                    ),
+                    subtitle: const Text('→ click for details'),
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
+                        isScrollControlled: true,
+                        builder: (context) => EventBottomSheet(event: event),
+                      );
+                    },
+                  ),
+                )).toList(),
+              ),
+              const SizedBox(height: 32),
+            ],
             _chatHistory.isEmpty
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,5 +181,12 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
     );
+  }
+
+  String _formatTime(DateTime dt) {
+    final hour = dt.hour > 12 ? dt.hour - 12 : dt.hour;
+    final ampm = dt.hour >= 12 ? 'pm' : 'am';
+    final min = dt.minute.toString().padLeft(2, '0');
+    return '$hour:$min $ampm';
   }
 } 

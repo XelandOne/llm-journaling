@@ -2,63 +2,100 @@
 from datetime import datetime
 import os
 import json
+from typing import Tuple, List
 
 import pytz
+from aci.types.enums import FunctionDefinitionFormat
 from mistralai import Mistral
 from dotenv import load_dotenv
 
+from schemes import Event
 from gcal import aci
+from openai import OpenAI
 
 load_dotenv()
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "xxx")
 
-client = Mistral(api_key=MISTRAL_API_KEY)
+# client = Mistral(api_key=MISTRAL_API_KEY)
+client = OpenAI()
 
-def call_mistral(messages, model="magistral-medium-2506"):
-    response = client.chat.complete(
+def google_event_to_event(event_data) -> Event:
+    return Event(
+        date=event_data["start"]["dateTime"][:10],
+        startTime=event_data["start"]["dateTime"],
+        endTime=event_data["end"]["dateTime"],
+        description=event_data.get("summary", ""),
+        tags=["calendar"],  # Adjust if you have tags in event_data
+        name=event_data.get("summary", ""),
+    )
+
+def lifeChat(messages, model="gpt-4.1") -> Tuple[str, List[Event]]:
+    tools=[
+        aci.functions.get_definition("GOOGLE_CALENDAR__EVENTS_INSERT"),
+        aci.functions.get_definition("GOOGLE_CALENDAR__EVENTS_LIST"),
+    ]
+    response = client.chat.completions.create(
         model=model,
         messages=messages,
-        tools=[
-               aci.functions.get_definition("GOOGLE_CALENDAR__EVENTS_INSERT")
-               ],
+        tools=tools,
         tool_choice="required",
-        max_tokens=4096,
-        prompt_mode=None
     )
-    tool_call = (
-        response.choices[0].message.tool_calls[0]
+    tool_calls = (
+        response.choices[0].message.tool_calls
         if response.choices[0].message.tool_calls
         else None
     )
 
-    if tool_call:
+    created_events = []
+    for tool_call in tool_calls:
         result = aci.handle_function_call(
             tool_call.function.name,
             json.loads(tool_call.function.arguments),
-            linked_account_owner_id=os.getenv("LINKED_ACCOUNT_OWNER_ID", "")
+            linked_account_owner_id=os.getenv("LINKED_ACCOUNT_OWNER_ID", ""),
         )
         print(result)
-    
-    # Clean up the response content by removing quotes if present
-    content = response.choices[0].message.content
-    if content.startswith('"') and content.endswith('"'):
-        content = content[1:-1]
-    return content
+        messages.append({"role": "assistant", "tool_calls": [tool_call]})
+        messages.append(
+            {
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": json.dumps(result),
+            }
+        )
+        if (
+                tool_call.function.name == "GOOGLE_CALENDAR__EVENTS_INSERT"
+                and result.get("success")
+                and "data" in result
+        ):
+            created_events.append(google_event_to_event(result["data"]))
 
-def extract_event_and_feeling(chat: str) -> dict:
+    messages[0] =  {
+        "role": "system",
+        "content": f"Answer the user as a journaling assistant and give him helpful guidance. Also inform him if you added something to his calendar. It is {datetime.now(pytz.timezone("Europe/Berlin")).strftime('%m/%d/%Y %I:%M:%S %p %Z')}.",
+    }
+    messages[1] = {
+        "role": "user",
+        "content": f"The request from the user: {messages[1]["content"]}",
+    }
+    response = client.chat.completions.create(
+        model=model,
+        messages=messages,
+    )
+    content = response.choices[0].message.content
+    return content, created_events
+
+def extract_event_and_feeling(chat: str) -> Tuple[Event, List[Event]]:
     system = {
         "role": "system",
-        "content": f"Extract structured Event and Feeling data from a user chat log. Make sure events are atomic and separated. Make sure to include all required parameters including path. Use timezone Europe/Berlin It is {datetime.now(pytz.timezone("Europe/Berlin")).strftime('%m/%d/%Y %I:%M:%S %p %Z')}.",
+        "content": f"Extract structured Event and Feeling data from a user chat log. Make sure events are atomic and separated. Do not use focus time. Always use orderBy startTime. Make sure to include all required parameters including path. Use timezone Europe/Berlin It is {datetime.now(pytz.timezone("Europe/Berlin")).strftime('%m/%d/%Y %I:%M:%S %p %Z')}.",
     }
     user = {
         "role": "user",
-        "content": f"""
-    Chat: "{chat}"
-
-""",
+        "content": chat
     }
-    response = call_mistral([system, user])
-    return json.loads(response)
+    response = lifeChat([system, user])
+    return response
+
 
 def generate_advice(events: list, feelings: list) -> str:
     prompt = f"""
@@ -74,15 +111,18 @@ def generate_advice(events: list, feelings: list) -> str:
     Return concise and short advices.
     """
 
-    messages = [{"role": "system", "content": "You are a life coach and you are helping the user to achieve their deadlines. Always format your responses in markdown."}, {"role": "user", "content": prompt}]
+    messages = [{"role": "system",
+                 "content": "You are a life coach and you are helping the user to achieve their deadlines. Always format your responses in markdown."},
+                {"role": "user", "content": prompt}]
 
     chat_response = client.chat.complete(
-            model="mistral-large-latest",
-            messages=messages,
-            temperature=0.3,
-            max_tokens=100
-        )
+        model="mistral-large-latest",
+        messages=messages,
+        temperature=0.3,
+        max_tokens=100
+    )
     return chat_response.choices[0].message.content
+
 
 def generate_motivation(events: list, feelings: list) -> str:
     prompt = f"""
@@ -94,14 +134,16 @@ def generate_motivation(events: list, feelings: list) -> str:
     Return concise and short quotes.
     """
 
-    messages = [{"role": "system", "content": "You are a motivation coach. Return 3 motivational quotes based on the user's events and feelings."}, {"role": "user", "content": prompt}]
+    messages = [{"role": "system",
+                 "content": "You are a motivation coach. Return 3 motivational quotes based on the user's events and feelings."},
+                {"role": "user", "content": prompt}]
 
     chat_response = client.chat.complete(
-            model="mistral-large-latest",
-            messages=messages,
-            temperature=0.3,
-            max_tokens=100
-        )
+        model="mistral-large-latest",
+        messages=messages,
+        temperature=0.3,
+        max_tokens=100
+    )
     return chat_response.choices[0].message.content
 
 
@@ -124,11 +166,12 @@ def generate_advice_from_feeling(feeling: str) -> str:
     Do not preamble. Just return the advices.
     """,
     }
-    return call_mistral([system, user], model="mistral-large-latest", max_tokens=500)
+    return lifeChat([system, user], model="mistral-large-latest", max_tokens=500)
 
 
 if __name__ == "__main__":
     from dummytesting.dummy_backend_moritz import generate_dummy_events
+
     events = generate_dummy_events()
 
     print(generate_advice(events=events))

@@ -1,10 +1,10 @@
 from fastapi import FastAPI, Query
-from pydantic import BaseModel, Field
-from typing import List, Optional
-from datetime import datetime, timedelta
+from typing import List
+from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from mistral import generate_advice
 from mistral import generate_motivation
+from schemes import Event, Feeling
 from voice import text_to_speech_stream
 from fastapi.responses import StreamingResponse
 
@@ -27,19 +27,6 @@ app.add_middleware(
 
 
 # --- Schemas ---
-class Event(BaseModel):
-    date: str
-    startTime: str
-    endTime: str
-    description: str
-    tags: List[str]
-    name: str
-
-
-class Feeling(BaseModel):
-    feelings: List[str]
-    score: int = Field(..., ge=1, le=10)
-    datetime: str
 
 
 # --- Dummy Data Generation ---
@@ -189,8 +176,11 @@ DUMMY_FEELINGS = generate_dummy_feelings()
 # --- Endpoints ---
 @app.post("/lifeChat")
 def submit_life_chat(chat: dict):
-    result = extract_event_and_feeling(chat['chat'])
-    return result
+    response, events = extract_event_and_feeling(chat['chat'])
+    return {
+        "response": response,
+        "created_events": events
+    }
 
 
 @app.get("/getEvents", response_model=List[Event])
