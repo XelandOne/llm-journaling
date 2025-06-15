@@ -70,7 +70,7 @@ def generate_advice(events: list, feelings: list) -> str:
     Provide advice based on events. 
     Please return some advices for the user to achieve their goals.
     Please return a list of advices of maximum 3.
-    Format your response in markdown for each advice.
+    IMPORTANT: Format the response in a single line with no newlines. Use bold for each advice.
     Do not preamble. Just return the advices.
     Return concise and short advices.
     """
@@ -81,6 +81,6 @@ def generate_advice(events: list, feelings: list) -> str:
             model="mistral-large-latest",
             messages=messages,
             temperature=0.3,
-            max_tokens=500
+            max_tokens=100
         )
     return chat_response.choices[0].message.content
