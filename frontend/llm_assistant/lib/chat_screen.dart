@@ -4,6 +4,7 @@ import 'api_service.dart';
 import 'chat_response.dart';
 import 'package:cupertino_icons/cupertino_icons.dart';
 import 'bottom_sheet.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -12,7 +13,7 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final ApiService apiService = ApiService();
   final TextEditingController _controller = TextEditingController();
   final List<ChatResponse> _chatHistory = [];
@@ -49,12 +50,34 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Let's chat about", style: Theme.of(context).textTheme.headlineMedium),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Let's chat about", style: Theme.of(context).textTheme.headlineMedium),
+                Image.asset('lib/assets/icon.png', width: 32, height: 32),
+              ],
+            ),
             const SizedBox(height: 16),
             Divider(thickness: 1, color: Colors.grey.shade300),
             const SizedBox(height: 16),
             Center(
-              child: Icon(CupertinoIcons.chat_bubble_2_fill, size: 80, color: Theme.of(context).colorScheme.primary.withOpacity(0.2)),
+              child: RepaintBoundary(
+                child: AnimatedBuilder(
+                  animation: Listenable.merge([
+                    AnimationController(
+                      vsync: this,
+                      duration: const Duration(seconds: 10),
+                    )..repeat(),
+                  ]),
+                  builder: (context, child) {
+                    return SvgPicture.asset(
+                      'lib/assets/smooth_spectral_animation.svg',
+                      width: 120,
+                      height: 120,
+                    );
+                  },
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             Text('Chat', style: Theme.of(context).textTheme.titleLarge),
