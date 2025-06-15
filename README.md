@@ -16,7 +16,7 @@ A journaling assistant powered by LLMs that helps users track their events, feel
 - Frontend: Flutter
 
 # Screenshots
-
+add ui screenshots with core functionalities
 
 # Set up 
 
@@ -31,12 +31,17 @@ export OPENAI_API_KEY=
 ```
 
 ## How to run
+``` bash
+
 python3 -m venv venv
 ./venv/bin/activate
 pip install -r requirements.txt
+```
 
 ## Run App
-
+``` bash
+...
+```
 
 
 
