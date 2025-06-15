@@ -4,6 +4,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'api_service.dart';
 import 'feeling.dart';
 import 'audio_service.dart';
+import 'event.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -16,6 +17,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final ApiService apiService = ApiService();
   final AudioService audioService = AudioService();
   late Future<List<Feeling>> _feelingsFuture;
+  late Future<List<Event>> _eventsFuture;
   late Future<String> _aiFeedbackFuture;
   late Future<void> _preloadAudioFuture;
 
@@ -23,8 +25,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     _feelingsFuture = apiService.getFeelingsLastWeek();
+    _eventsFuture = apiService.getEventsLastWeek();
     _aiFeedbackFuture = apiService.getAiFeedbackLastWeek();
-    // Start preloading the audio immediately
     _preloadAudioFuture = audioService.preloadMotivationalSpeech();
   }
 
@@ -58,66 +60,133 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 16),
             FutureBuilder<List<Feeling>>(
               future: _feelingsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+              builder: (context, feelingsSnapshot) {
+                if (feelingsSnapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Text('Error: \\${snapshot.error}');
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text('No data for last week.');
+                } else if (feelingsSnapshot.hasError) {
+                  return Text('Error: ${feelingsSnapshot.error}');
+                } else if (!feelingsSnapshot.hasData || feelingsSnapshot.data!.isEmpty) {
+                  return const Text('No feelings data for last week.');
                 }
-                final feelings = snapshot.data!;
-                // For demo: Productivity = avg of 'motivated', Anxiety = avg of 'anxious'
+
+                final feelings = feelingsSnapshot.data!;
+                
+                // Calculate feeling-based metrics
                 final prodScores = feelings.where((f) => f.feelings.contains('motivated')).map((f) => f.score).toList();
                 final anxScores = feelings.where((f) => f.feelings.contains('anxious')).map((f) => f.score).toList();
+                final happyScores = feelings.where((f) => f.feelings.contains('happy')).map((f) => f.score).toList();
+                final calmScores = feelings.where((f) => f.feelings.contains('calm')).map((f) => f.score).toList();
+                
+                // Calculate averages
                 final prodAvg = prodScores.isNotEmpty ? prodScores.reduce((a, b) => a + b) / prodScores.length : 0.0;
                 final anxAvg = anxScores.isNotEmpty ? anxScores.reduce((a, b) => a + b) / anxScores.length : 0.0;
-                return Column(
-                  children: [
-                    Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          children: [
-                            Icon(CupertinoIcons.chart_bar_alt_fill, color: Theme.of(context).colorScheme.primary),
-                            const SizedBox(width: 12),
-                            _StatCircle(label: 'Productivity', value: prodAvg.toDouble()),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Text(
-                                prodAvg > 7 ? 'Your productivity was very high' : 'Your productivity was moderate',
-                                style: Theme.of(context).textTheme.bodyLarge,
+                final happyAvg = happyScores.isNotEmpty ? happyScores.reduce((a, b) => a + b) / happyScores.length : 0.0;
+                final calmAvg = calmScores.isNotEmpty ? calmScores.reduce((a, b) => a + b) / calmScores.length : 0.0;
+
+                // Calculate emotional balance (positive vs negative feelings)
+                final positiveFeelings = feelings.where((f) => 
+                  f.feelings.any((feeling) => ['happy', 'calm', 'relaxed', 'excited', 'motivated'].contains(feeling))
+                ).length;
+                final negativeFeelings = feelings.where((f) => 
+                  f.feelings.any((feeling) => ['sad', 'angry', 'anxious', 'stressed', 'tired'].contains(feeling))
+                ).length;
+                final emotionalBalance = positiveFeelings + negativeFeelings > 0 
+                  ? (positiveFeelings / (positiveFeelings + negativeFeelings)) * 10 
+                  : 5.0;
+
+                return FutureBuilder<List<Event>>(
+                  future: _eventsFuture,
+                  builder: (context, eventsSnapshot) {
+                    if (eventsSnapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final events = eventsSnapshot.data ?? [];
+                    
+                    // Calculate event-based metrics
+                    final workEvents = events.where((e) => e.tags.contains('work')).length;
+                    final healthEvents = events.where((e) => e.tags.contains('health')).length;
+                    final socialEvents = events.where((e) => e.tags.contains('social')).length;
+                    final totalEvents = events.length;
+                    
+                    // Calculate work-life balance (work events vs non-work events)
+                    final workLifeBalance = totalEvents > 0 
+                      ? ((totalEvents - workEvents) / totalEvents) * 10 
+                      : 5.0;
+
+                    return Column(
+                      children: [
+                        // Emotional Well-being Section
+                        Text('Emotional Well-being', style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 12),
+                        Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Row(
+                              children: [
+                                Icon(CupertinoIcons.heart_fill, color: Theme.of(context).colorScheme.primary),
+                                const SizedBox(width: 12),
+                                _StatCircle(label: 'Happiness', value: happyAvg),
+                                const SizedBox(width: 16),
+                                _StatCircle(label: 'Calmness', value: calmAvg),
+                                const SizedBox(width: 16),
+                                _StatCircle(label: 'Balance', value: emotionalBalance),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Productivity & Stress Section
+                        Text('Productivity & Stress', style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 12),
+                        Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Row(
+                              children: [
+                                Icon(CupertinoIcons.chart_bar_alt_fill, color: Theme.of(context).colorScheme.primary),
+                                const SizedBox(width: 12),
+                                _StatCircle(label: 'Productivity', value: prodAvg),
+                                const SizedBox(width: 16),
+                                _StatCircle(label: 'Anxiety', value: anxAvg),
+                                const SizedBox(width: 16),
+                                _StatCircle(label: 'Work-Life', value: workLifeBalance),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Activity Distribution Section
+                        if (events.isNotEmpty) ...[
+                          Text('Activity Distribution', style: Theme.of(context).textTheme.titleLarge),
+                          const SizedBox(height: 12),
+                          Card(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 2,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _ActivityBar(label: 'Work', value: workEvents, total: totalEvents),
+                                  const SizedBox(height: 8),
+                                  _ActivityBar(label: 'Health', value: healthEvents, total: totalEvents),
+                                  const SizedBox(height: 8),
+                                  _ActivityBar(label: 'Social', value: socialEvents, total: totalEvents),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          children: [
-                            Icon(CupertinoIcons.waveform_path_ecg, color: Theme.of(context).colorScheme.primary),
-                            const SizedBox(width: 12),
-                            _StatCircle(label: 'Anxiety', value: anxAvg.toDouble()),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Text(
-                                anxAvg > 7 ? 'Your anxiety was very high' : 'Your anxiety was moderate',
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                          ),
+                        ],
+                      ],
+                    );
+                  },
                 );
               },
             ),
@@ -221,6 +290,41 @@ class _StatCircle extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(label, style: Theme.of(context).textTheme.bodyMedium),
+      ],
+    );
+  }
+}
+
+class _ActivityBar extends StatelessWidget {
+  final String label;
+  final int value;
+  final int total;
+
+  const _ActivityBar({required this.label, required this.value, required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    final percentage = total > 0 ? value / total : 0.0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: Theme.of(context).textTheme.bodyMedium),
+            Text('$value events', style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
+        const SizedBox(height: 4),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: percentage,
+            minHeight: 8,
+            backgroundColor: Colors.grey.shade200,
+            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+          ),
+        ),
       ],
     );
   }

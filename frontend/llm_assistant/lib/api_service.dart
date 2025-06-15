@@ -106,4 +106,17 @@ class ApiService {
       throw Exception('Failed to load event advice');
     }
   }
+
+  Future<List<Event>> getEventsLastWeek() async {
+    final now = DateTime.now();
+    final start = now.subtract(const Duration(days: 7)).toIso8601String();
+    final end = now.toIso8601String();
+    final response = await http.get(Uri.parse('$baseUrl/getEvents?startTime=$start&endTime=$end'));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((e) => Event.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to load events');
+    }
+  }
 } 
