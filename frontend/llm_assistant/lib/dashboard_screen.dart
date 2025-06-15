@@ -5,6 +5,7 @@ import 'api_service.dart';
 import 'feeling.dart';
 import 'audio_service.dart';
 import 'event.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -55,7 +56,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Your last week in stats', style: Theme.of(context).textTheme.headlineMedium),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Your last week in stats', style: Theme.of(context).textTheme.headlineMedium),
+                Image.asset('lib/assets/icon.png', width: 32, height: 32),
+              ],
+            ),
             Divider(thickness: 1, color: Colors.grey.shade300),
             const SizedBox(height: 16),
             FutureBuilder<List<Feeling>>(

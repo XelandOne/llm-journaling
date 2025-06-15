@@ -4,6 +4,7 @@ import 'api_service.dart';
 import 'event.dart';
 import 'bottom_sheet.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class StartScreen extends StatefulWidget {
   const StartScreen({super.key});
@@ -33,7 +34,13 @@ class _StartScreenState extends State<StartScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Events today', style: Theme.of(context).textTheme.headlineMedium),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Events today', style: Theme.of(context).textTheme.headlineMedium),
+                Image.asset('lib/assets/icon.png', width: 32, height: 32),
+              ],
+            ),
             Divider(thickness: 1, color: Colors.grey.shade300),
             const SizedBox(height: 16),
             FutureBuilder<List<Event>>(

@@ -1,0 +1,156 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="circleClip">
+      <circle cx="100" cy="100" r="85"/>
+    </clipPath>
+    
+    <linearGradient id="spectralGradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:0.8" />
+      <stop offset="30%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#f093fb;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#4facfe;stop-opacity:0.7" />
+    </linearGradient>
+    
+    <linearGradient id="spectralGradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f093fb;stop-opacity:0.6" />
+      <stop offset="40%" style="stop-color:#f5576c;stop-opacity:0.8" />
+      <stop offset="80%" style="stop-color:#4facfe;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:0.5" />
+    </linearGradient>
+    
+    <linearGradient id="spectralGradient3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:0.4" />
+      <stop offset="50%" style="stop-color:#764ba2;stop-opacity:0.7" />
+      <stop offset="100%" style="stop-color:#f093fb;stop-opacity:0.5" />
+    </linearGradient>
+    
+    <filter id="blur1">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+    </filter>
+    
+    <filter id="blur2">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+    </filter>
+    
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Outer circle border with subtle glow -->
+  <circle cx="100" cy="100" r="85" fill="none" stroke="url(#spectralGradient1)" stroke-width="1" opacity="0.3" filter="url(#glow)">
+    <animate attributeName="opacity" values="0.2;0.4;0.3;0.5;0.2" dur="8s" repeatCount="indefinite" calcMode="spline" keySplines="0.25,0.1,0.25,1;0.25,0.1,0.25,1;0.25,0.1,0.25,1;0.25,0.1,0.25,1" keyTimes="0;0.25;0.5;0.75;1"/>
+  </circle>
+  
+  <!-- Main content group clipped to circle -->
+  <g clip-path="url(#circleClip)">
+    
+    <!-- Background ambient glow -->
+    <ellipse cx="100" cy="100" rx="80" ry="25" fill="url(#spectralGradient1)" opacity="0.1" filter="url(#blur2)">
+      <animate attributeName="opacity" values="0.05;0.15;0.12;0.2;0.05" dur="12s" repeatCount="indefinite" calcMode="spline" keySplines="0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1" keyTimes="0;0.25;0.5;0.75;1"/>
+      <animateTransform attributeName="transform" 
+                        type="scale" 
+                        values="1;1.05;1.02;1.1;1" 
+                        dur="12s" 
+                        repeatCount="indefinite"
+                        calcMode="spline" 
+                        keySplines="0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1" 
+                        keyTimes="0;0.25;0.5;0.75;1"/>
+    </ellipse>
+    
+    <!-- Primary horizontal spectral wave -->
+    <path d="M15 100 Q45 70, 75 85 T135 75 T165 90 T195 80 L195 120 Q165 130, 135 115 T75 125 T45 110 T15 120 Z" 
+          fill="url(#spectralGradient1)" 
+          opacity="0.8">
+      <animate attributeName="d" 
+               values="M15 100 Q45 70, 75 85 T135 75 T165 90 T195 80 L195 120 Q165 130, 135 115 T75 125 T45 110 T15 120 Z;
+                       M15 95 Q45 75, 75 78 T135 82 T165 85 T195 85 L195 125 Q165 125, 135 122 T75 122 T45 115 T15 125 Z;
+                       M15 90 Q45 80, 75 65 T135 85 T165 70 T195 90 L195 130 Q165 120, 135 135 T75 115 T45 120 T15 130 Z;
+                       M15 105 Q45 65, 75 88 T135 72 T165 95 T195 75 L195 115 Q165 135, 135 112 T75 128 T45 105 T15 115 Z;
+                       M15 110 Q45 60, 75 95 T135 65 T165 100 T195 70 L195 110 Q165 140, 135 105 T75 135 T45 100 T15 110 Z;
+                       M15 100 Q45 70, 75 85 T135 75 T165 90 T195 80 L195 120 Q165 130, 135 115 T75 125 T45 110 T15 120 Z" 
+               dur="10s" 
+               repeatCount="indefinite"
+               calcMode="spline" 
+               keySplines="0.25,0.1,0.25,1;0.25,0.1,0.25,1;0.25,0.1,0.25,1;0.25,0.1,0.25,1;0.25,0.1,0.25,1" 
+               keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+    </path>
+    
+    <!-- Secondary horizontal wave layer -->
+    <path d="M15 105 Q55 85, 95 90 T155 80 T195 85 L195 115 Q155 125, 115 110 T55 120 T15 115 Z" 
+          fill="url(#spectralGradient2)" 
+          opacity="0.6" 
+          filter="url(#blur1)">
+      <animate attributeName="d" 
+               values="M15 105 Q55 85, 95 90 T155 80 T195 85 L195 115 Q155 125, 115 110 T55 120 T15 115 Z;
+                       M15 100 Q55 90, 95 82 T155 85 T195 80 L195 120 Q155 120, 115 118 T55 115 T15 120 Z;
+                       M15 95 Q55 95, 95 70 T155 90 T195 75 L195 125 Q155 115, 115 130 T55 110 T15 125 Z;
+                       M15 108 Q55 78, 95 95 T155 75 T195 90 L195 112 Q155 130, 115 105 T55 125 T15 112 Z;
+                       M15 115 Q55 75, 95 100 T155 70 T195 95 L195 105 Q155 135, 115 100 T55 130 T15 105 Z;
+                       M15 105 Q55 85, 95 90 T155 80 T195 85 L195 115 Q155 125, 115 110 T55 120 T15 115 Z" 
+               dur="8s" 
+               repeatCount="indefinite"
+               calcMode="spline" 
+               keySplines="0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1" 
+               keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+    </path>
+    
+    <!-- Tertiary soft horizontal cloud layer -->
+    <path d="M15 110 Q75 90, 135 95 T195 90 L195 110 Q135 120, 75 115 T15 110 Z" 
+          fill="url(#spectralGradient3)" 
+          opacity="0.4" 
+          filter="url(#blur2)">
+      <animate attributeName="d" 
+               values="M15 110 Q75 90, 135 95 T195 90 L195 110 Q135 120, 75 115 T15 110 Z;
+                       M15 105 Q75 95, 135 88 T195 95 L195 115 Q135 115, 75 118 T15 115 Z;
+                       M15 100 Q75 100, 135 75 T195 100 L195 120 Q135 110, 75 125 T15 120 Z;
+                       M15 112 Q75 85, 135 98 T195 85 L195 108 Q135 125, 75 112 T15 108 Z;
+                       M15 120 Q75 80, 135 105 T195 80 L195 100 Q135 130, 75 105 T15 100 Z;
+                       M15 110 Q75 90, 135 95 T195 90 L195 110 Q135 120, 75 115 T15 110 Z" 
+               dur="14s" 
+               repeatCount="indefinite"
+               calcMode="spline" 
+               keySplines="0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95" 
+               keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+    </path>
+    
+    <!-- Floating energy particles -->
+    <g opacity="0.6">
+      <circle cx="50" cy="85" r="2" fill="#667eea">
+        <animate attributeName="cy" values="85;78;70;65;78;85" dur="12s" repeatCount="indefinite" calcMode="spline" keySplines="0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1" keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+        <animate attributeName="cx" values="50;53;57;60;57;50" dur="12s" repeatCount="indefinite" calcMode="spline" keySplines="0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1" keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+        <animate attributeName="opacity" values="0.3;0.5;0.7;0.8;0.5;0.3" dur="12s" repeatCount="indefinite" calcMode="spline" keySplines="0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1" keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+      </circle>
+      
+      <circle cx="100" cy="95" r="1.5" fill="#f093fb">
+        <animate attributeName="cy" values="95;88;80;75;82;95" dur="10s" repeatCount="indefinite" calcMode="spline" keySplines="0.25,0.1,0.25,1;0.25,0.1,0.25,1;0.25,0.1,0.25,1;0.25,0.1,0.25,1;0.25,0.1,0.25,1" keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+        <animate attributeName="cx" values="100;103;107;110;105;100" dur="10s" repeatCount="indefinite" calcMode="spline" keySplines="0.25,0.1,0.25,1;0.25,0.1,0.25,1;0.25,0.1,0.25,1;0.25,0.1,0.25,1;0.25,0.1,0.25,1" keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+        <animate attributeName="opacity" values="0.4;0.6;0.8;0.9;0.6;0.4" dur="10s" repeatCount="indefinite" calcMode="spline" keySplines="0.25,0.1,0.25,1;0.25,0.1,0.25,1;0.25,0.1,0.25,1;0.25,0.1,0.25,1;0.25,0.1,0.25,1" keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+      </circle>
+      
+      <circle cx="150" cy="80" r="1.8" fill="#4facfe">
+        <animate attributeName="cy" values="80;73;65;60;68;80" dur="11s" repeatCount="indefinite" calcMode="spline" keySplines="0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95" keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+        <animate attributeName="cx" values="150;147;143;140;145;150" dur="11s" repeatCount="indefinite" calcMode="spline" keySplines="0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95" keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+        <animate attributeName="opacity" values="0.2;0.4;0.6;0.7;0.4;0.2" dur="11s" repeatCount="indefinite" calcMode="spline" keySplines="0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95;0.45,0.05,0.55,0.95" keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+      </circle>
+      
+      <circle cx="80" cy="115" r="1.2" fill="#764ba2">
+        <animate attributeName="cy" values="115;108;100;95;103;115" dur="15s" repeatCount="indefinite" calcMode="spline" keySplines="0.55,0.055,0.675,0.19;0.55,0.055,0.675,0.19;0.55,0.055,0.675,0.19;0.55,0.055,0.675,0.19;0.55,0.055,0.675,0.19" keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+        <animate attributeName="cx" values="80;83;87;90;85;80" dur="15s" repeatCount="indefinite" calcMode="spline" keySplines="0.55,0.055,0.675,0.19;0.55,0.055,0.675,0.19;0.55,0.055,0.675,0.19;0.55,0.055,0.675,0.19;0.55,0.055,0.675,0.19" keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+        <animate attributeName="opacity" values="0.5;0.7;0.9;1;0.7;0.5" dur="15s" repeatCount="indefinite" calcMode="spline" keySplines="0.55,0.055,0.675,0.19;0.55,0.055,0.675,0.19;0.55,0.055,0.675,0.19;0.55,0.055,0.675,0.19;0.55,0.055,0.675,0.19" keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+      </circle>
+      
+      <circle cx="130" cy="110" r="1" fill="#f5576c">
+        <animate attributeName="cy" values="110;103;95;90;98;110" dur="9s" repeatCount="indefinite" calcMode="spline" keySplines="0.25,0.46,0.45,0.94;0.25,0.46,0.45,0.94;0.25,0.46,0.45,0.94;0.25,0.46,0.45,0.94;0.25,0.46,0.45,0.94" keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+        <animate attributeName="cx" values="130;133;137;140;135;130" dur="9s" repeatCount="indefinite" calcMode="spline" keySplines="0.25,0.46,0.45,0.94;0.25,0.46,0.45,0.94;0.25,0.46,0.45,0.94;0.25,0.46,0.45,0.94;0.25,0.46,0.45,0.94" keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+        <animate attributeName="opacity" values="0.3;0.5;0.7;0.8;0.5;0.3" dur="9s" repeatCount="indefinite" calcMode="spline" keySplines="0.25,0.46,0.45,0.94;0.25,0.46,0.45,0.94;0.25,0.46,0.45,0.94;0.25,0.46,0.45,0.94;0.25,0.46,0.45,0.94" keyTimes="0;0.2;0.4;0.6;0.8;1"/>
+      </circle>
+    </g>
+    
+  </g>
+  
+</svg>
