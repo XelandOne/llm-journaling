@@ -44,8 +44,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 60.0, bottom: 20.0),
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 48.0, bottom: 16.0),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,64 +54,87 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Let's chat about", style: Theme.of(context).textTheme.headlineMedium),
-                Image.asset('lib/assets/icon.png', width: 32, height: 32),
+                Text(
+                  "Let's chat about",
+                  style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.all(6),
+                  child: Image.asset('lib/assets/icon.png', width: 32, height: 32),
+                ),
               ],
             ),
-            const SizedBox(height: 16),
-            Divider(thickness: 1, color: Colors.grey.shade300),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            Divider(thickness: 1, color: Colors.grey.shade200),
+            const SizedBox(height: 12),
             Center(
-              child: RepaintBoundary(
-                child: AnimatedBuilder(
-                  animation: Listenable.merge([
-                    AnimationController(
-                      vsync: this,
-                      duration: const Duration(seconds: 10),
-                    )..repeat(),
-                  ]),
-                  builder: (context, child) {
-                    return SvgPicture.asset(
-                      'lib/assets/smooth_spectral_animation.svg',
-                      width: 120,
-                      height: 120,
-                    );
-                  },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withOpacity(0.07),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.colorScheme.primary.withOpacity(0.08),
+                      blurRadius: 24,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(16),
+                child: SvgPicture.asset(
+                  'lib/assets/smooth_spectral_animation.svg',
+                  width: 100,
+                  height: 100,
                 ),
               ),
             ),
             const SizedBox(height: 24),
-            Text('Chat', style: Theme.of(context).textTheme.titleLarge),
+            Text('Chat', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 3,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              color: theme.cardColor,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: Row(
                   children: [
                     Expanded(
                       child: TextField(
                         controller: _controller,
                         decoration: const InputDecoration(
-                          hintText: '... type in your thoughts',
+                          hintText: 'Type your thoughts...'
+                              ,
                           border: InputBorder.none,
                           isDense: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                          contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                         ),
                         minLines: 1,
                         maxLines: 3,
                         enabled: !_loading,
                         textInputAction: TextInputAction.send,
                         onSubmitted: (_) => _sendChat(),
+                        style: theme.textTheme.bodyLarge,
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    IconButton(
-                      icon: _loading
-                          ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
-                          : const Icon(CupertinoIcons.paperplane_fill),
-                      onPressed: _loading ? null : _sendChat,
+                    const SizedBox(width: 6),
+                    Material(
+                      color: theme.colorScheme.primary,
+                      borderRadius: BorderRadius.circular(12),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: _loading ? null : _sendChat,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: _loading
+                              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : const Icon(CupertinoIcons.paperplane_fill, color: Colors.white),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -120,80 +144,115 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               const SizedBox(height: 8),
               Text(_error!, style: const TextStyle(color: Colors.red)),
             ],
-            const SizedBox(height: 32),
-            const SizedBox(height: 8),
+            const SizedBox(height: 24),
             if (_chatHistory.isNotEmpty && _chatHistory.first.response != null) ...[
-              Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 1,
-                color: Colors.grey.shade100,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(_chatHistory.first.response!),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withOpacity(0.06),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    _chatHistory.first.response!,
+                    style: theme.textTheme.bodyLarge?.copyWith(fontSize: 17),
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
             ],
             if (_chatHistory.isNotEmpty && _chatHistory.first.feeling != null && _chatHistory.first.feeling!.isNotEmpty) ...[
               ..._chatHistory.first.feeling!.map((feeling) => Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 1,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                elevation: 2,
                 color: Colors.yellow.shade50,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Feeling detected:',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        feeling.feelings.join(", "),
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Score: ${feeling.score}',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      if (feeling.datetime != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          'Time: ${feeling.datetime}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                      Icon(CupertinoIcons.smiley, color: Colors.orange.shade400, size: 32),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Feeling detected:',
+                              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              feeling.feelings.join(", "),
+                              style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Score:  0${feeling.score}',
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                            if (feeling.datetime != null) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                'Time: ${feeling.datetime}',
+                                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                              ),
+                            ]
+                          ],
                         ),
-                      ]
+                      ),
                     ],
                   ),
                 ),
               )).toList(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
             ],
             if (_chatHistory.isNotEmpty && _chatHistory.first.createdEvents != null && _chatHistory.first.createdEvents!.isNotEmpty) ...[
-              Text('Created Events', style: Theme.of(context).textTheme.titleMedium),
-              Divider(thickness: 1, color: Colors.grey.shade200),
-              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.only(left: 2, bottom: 4),
+                child: Text('Created Events', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+              ),
+              Divider(thickness: 1, color: Colors.grey.shade100),
+              const SizedBox(height: 6),
               Column(
                 children: _chatHistory.first.createdEvents!.map((event) => Card(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 2,
                   child: ListTile(
-                    leading: Icon(CupertinoIcons.calendar, color: Theme.of(context).colorScheme.primary),
+                    leading: Icon(CupertinoIcons.calendar, color: theme.colorScheme.primary),
                     title: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          _formatTime(event.startTime),
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "${_formatTime(event.startTime)}\n",
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                              TextSpan(
+                                text: event.description,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           event.description,
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          style: theme.textTheme.bodyLarge,
                           softWrap: true,
                         ),
                       ],
@@ -202,7 +261,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                     onTap: () {
                       showModalBottomSheet(
                         context: context,
-                        shape: RoundedRectangleBorder(
+                        shape: const RoundedRectangleBorder(
                           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                         ),
                         isScrollControlled: true,
@@ -212,27 +271,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                   ),
                 )).toList(),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
             ],
-            _chatHistory.isEmpty
-                ? const SizedBox.shrink()
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _chatHistory.map((resp) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (resp.feeling != null && resp.feeling!.isNotEmpty) ...[
-                            Text('- Feeling detected:'),
-                            ...resp.feeling!.map((f) => Text('  ${f.feelings.join(", ")} (score: ${f.score})')).toList(),
-                          ],
-                          if (resp.event != null)
-                            Text('- Event detected:  ${resp.event!.description}'),
-                        ],
-                      ),
-                    )).toList(),
-                  ),
           ],
         ),
       ),
