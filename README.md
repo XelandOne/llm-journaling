@@ -57,9 +57,9 @@ llm-journal-1/
 ├── backend/
 │   ├── mistral.py          # Main LLM interaction logic
 │   ├── schemes.py          # Data models and schemas
-│   └── gcal/              # Google Calendar integration
+│   └── gcal/               # Google Calendar integration
 ├── requirements.txt        # Project dependencies
-└── README.md              # This file
+└── README.md              
 ```
 
 # License
