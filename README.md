@@ -1,4 +1,4 @@
-# LLM Journal
+# LLM Journal App
 A journaling assistant powered by LLMs that helps users track their events, feelings, and provides personalized advice and motivation based on their Google Calender. This Project was build in 24h during the Tech: Karlsruhe AI Hackathon.
 
 ## Features
@@ -30,7 +30,7 @@ export LINKED_ACCOUNT_OWNER_ID=
 export OPENAI_API_KEY=
 ```
 
-## How to run
+## Set up env
 ``` bash
 
 python3 -m venv venv
