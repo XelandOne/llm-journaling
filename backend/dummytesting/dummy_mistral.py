@@ -49,7 +49,7 @@ def call_mistral(messages, model="mistral-large-latest", temperature=0.7):
 def extract_event_and_feeling(chat: str) -> dict:
     system = {
         "role": "system",
-        "content": f"Extract structured Event and Feeling data from a user chat log. Make sure events are atomic and separated. Make sure to include all required parameters including path. Use timezone Europe/Berlin It is {datetime.now(pytz.timezone("Europe/Berlin")).strftime('%m/%d/%Y %I:%M:%S %p %Z')}.",
+        "content": f"You are a life assistant in a journal app. Call appropriate functions with Events and Feelings that the user utters. Make sure events are atomic and separated. Make sure to include all required parameters including path. Use timezone Europe/Berlin It is {datetime.now(pytz.timezone("Europe/Berlin")).strftime('%m/%d/%Y %I:%M:%S %p %Z')}.",
     }
     user = {
         "role": "user",

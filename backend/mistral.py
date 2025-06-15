@@ -14,7 +14,7 @@ MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "xxx")
 
 client = Mistral(api_key=MISTRAL_API_KEY)
 
-def call_mistral(messages, model="mistral-large-latest"):
+def call_mistral(messages, model="magistral-medium-2506"):
     response = client.chat.complete(
         model=model,
         messages=messages,
@@ -22,7 +22,8 @@ def call_mistral(messages, model="mistral-large-latest"):
                aci.functions.get_definition("GOOGLE_CALENDAR__EVENTS_INSERT")
                ],
         tool_choice="required",
-        max_tokens=200,  # Increased token limit
+        max_tokens=4096,
+        prompt_mode=None
     )
     tool_call = (
         response.choices[0].message.tool_calls[0]
