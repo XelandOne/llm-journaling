@@ -57,10 +57,22 @@ class _StartScreenState extends State<StartScreen> {
                             title: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  _formatTime(event.startTime),
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: Theme.of(context).colorScheme.primary,
+                                Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: "${_formatTime(event.startTime)}\n",
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                          color: Theme.of(context).colorScheme.primary,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: event.name,
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 const SizedBox(height: 4),
