@@ -111,6 +111,43 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               const SizedBox(height: 16),
             ],
+            if (_chatHistory.isNotEmpty && _chatHistory.first.feeling != null && _chatHistory.first.feeling!.isNotEmpty) ...[
+              ..._chatHistory.first.feeling!.map((feeling) => Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 1,
+                color: Colors.yellow.shade50,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Feeling detected:',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        feeling.feelings.join(", "),
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Score: ${feeling.score}',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      if (feeling.datetime != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          'Time: ${feeling.datetime}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                        ),
+                      ]
+                    ],
+                  ),
+                ),
+              )).toList(),
+              const SizedBox(height: 16),
+            ],
             if (_chatHistory.isNotEmpty && _chatHistory.first.createdEvents != null && _chatHistory.first.createdEvents!.isNotEmpty) ...[
               Text('Created Events', style: Theme.of(context).textTheme.titleMedium),
               Divider(thickness: 1, color: Colors.grey.shade200),
@@ -163,10 +200,12 @@ class _ChatScreenState extends State<ChatScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (resp.feeling != null)
-                            Text('- Feeling detected: ${resp.feeling!.feelings.join(", ")} (score: ${resp.feeling!.score})'),
+                          if (resp.feeling != null && resp.feeling!.isNotEmpty) ...[
+                            Text('- Feeling detected:'),
+                            ...resp.feeling!.map((f) => Text('  ${f.feelings.join(", ")} (score: ${f.score})')).toList(),
+                          ],
                           if (resp.event != null)
-                            Text('- Event detected: ${resp.event!.description}'),
+                            Text('- Event detected:  ${resp.event!.description}'),
                         ],
                       ),
                     )).toList(),

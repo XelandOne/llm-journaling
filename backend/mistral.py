@@ -9,7 +9,7 @@ from aci.types.enums import FunctionDefinitionFormat
 from mistralai import Mistral
 from dotenv import load_dotenv
 
-from schemes import Event
+from schemes import Event, Feeling
 from gcal import aci
 from openai import OpenAI
 
@@ -29,10 +29,51 @@ def google_event_to_event(event_data) -> Event:
         name=event_data.get("summary", ""),
     )
 
+# --- Custom Tool for Feeling Extraction ---
+def extract_feeling_from_log(feelings=None, score=None) -> dict:
+    """
+    Dummy implementation: Extracts a Feeling from a log string.
+    Returns a dict with keys: feelings (list), score (int), datetime (str).
+    Accepts optional arguments to create a Feeling entry.
+    """
+    from schemes import Feeling
+    datetime_val = datetime.now().isoformat()
+    feeling_obj = Feeling(
+        feelings=feelings,
+        score=score,
+        datetime=datetime_val
+    )
+    return feeling_obj.model_dump()
+
+# Tool definition for OpenAI
+feeling_tool = {
+    "type": "function",
+    "function": {
+        "name": "extract_feeling_from_log",
+        "description": "Extracts a feeling from a user log. Always call this if the user utters how he feels.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "feelings": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "A list of feelings or emotions expressed by the user."
+                },
+                "score": {
+                    "type": "integer",
+                    "description": "A score representing the intensity of the feeling (1-10)."
+                }
+            },
+            "required": ["feelings", "score"]
+        }
+    }
+}
+
 def lifeChat(messages, model="gpt-4.1") -> Tuple[str, List[Event]]:
     tools=[
         aci.functions.get_definition("GOOGLE_CALENDAR__EVENTS_INSERT"),
         aci.functions.get_definition("GOOGLE_CALENDAR__EVENTS_LIST"),
+        feeling_tool,  # Register the custom feeling extraction tool
     ]
     response = openai_client.chat.completions.create(
         model=model,
@@ -47,47 +88,52 @@ def lifeChat(messages, model="gpt-4.1") -> Tuple[str, List[Event]]:
     )
 
     created_events = []
+    created_feelings = []  # Collect extracted feelings
     for tool_call in tool_calls:
-        result = aci.handle_function_call(
-            tool_call.function.name,
-            json.loads(tool_call.function.arguments),
-            linked_account_owner_id=os.getenv("LINKED_ACCOUNT_OWNER_ID", ""),
-        )
-        print(result)
-        messages.append({"role": "assistant", "tool_calls": [tool_call]})
-        messages.append(
-            {
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "content": json.dumps(result),
-            }
-        )
-        if (
-                tool_call.function.name == "GOOGLE_CALENDAR__EVENTS_INSERT"
-                and result.get("success")
-                and "data" in result
-        ):
-            created_events.append(google_event_to_event(result["data"]))
+        if tool_call.function.name == "extract_feeling_from_log":
+            result = extract_feeling_from_log(**json.loads(tool_call.function.arguments))
+            created_feelings.append(result)
+        else:
+            result = aci.handle_function_call(
+                tool_call.function.name,
+                json.loads(tool_call.function.arguments),
+                linked_account_owner_id=os.getenv("LINKED_ACCOUNT_OWNER_ID", ""),
+            )
+            print(result)
+            messages.append({"role": "assistant", "tool_calls": [tool_call]})
+            messages.append(
+                {
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": json.dumps(result),
+                }
+            )
+            if (
+                    tool_call.function.name == "GOOGLE_CALENDAR__EVENTS_INSERT"
+                    and result.get("success")
+                    and "data" in result
+            ):
+                created_events.append(google_event_to_event(result["data"]))
 
     messages[0] =  {
         "role": "system",
-        "content": f"Answer the user as a journaling assistant and give him helpful guidance. Also inform him if you added something to his calendar. It is {datetime.now(pytz.timezone("Europe/Berlin")).strftime('%m/%d/%Y %I:%M:%S %p %Z')}.",
+        "content": f"Answer the user as a journaling assistant and give him helpful guidance. Also inform him if you added something to his calendar. It is {datetime.now(pytz.timezone('Europe/Berlin')).strftime('%m/%d/%Y %I:%M:%S %p %Z')}.",
     }
     messages[1] = {
         "role": "user",
-        "content": f"The request from the user: {messages[1]["content"]}",
+        "content": f"The request from the user: {messages[1]['content']}",
     }
     response = openai_client.chat.completions.create(
         model=model,
         messages=messages,
     )
     content = response.choices[0].message.content
-    return content, created_events
+    return content, created_events, created_feelings
 
 def extract_event_and_feeling(chat: str) -> Tuple[Event, List[Event]]:
     system = {
         "role": "system",
-        "content": f"Extract structured Event and Feeling data from a user chat log. Make sure events are atomic and separated. Do not use focus time. Always use orderBy startTime. Make sure to include all required parameters including path. Use timezone Europe/Berlin It is {datetime.now(pytz.timezone("Europe/Berlin")).strftime('%m/%d/%Y %I:%M:%S %p %Z')}.",
+        "content": f"Extract structured Event and Feeling data from a user chat log. Make sure events are atomic and separated. Do not use focus time. Always use orderBy startTime. Make sure to include all required parameters including path. Use timezone Europe/Berlin It is {datetime.now(pytz.timezone('Europe/Berlin')).strftime('%m/%d/%Y %I:%M:%S %p %Z')}.",
     }
     user = {
         "role": "user",

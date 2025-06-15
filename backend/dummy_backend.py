@@ -176,10 +176,11 @@ DUMMY_FEELINGS = generate_dummy_feelings()
 # --- Endpoints ---
 @app.post("/lifeChat")
 def submit_life_chat(chat: dict):
-    response, events = extract_event_and_feeling(chat['chat'])
+    response, events, feelings = extract_event_and_feeling(chat['chat'])
     return {
         "response": response,
-        "created_events": events
+        "created_events": events,
+        "feeling": feelings
     }
 
 
