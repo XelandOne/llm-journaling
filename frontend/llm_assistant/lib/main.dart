@@ -13,6 +13,7 @@ void main() {
   runApp(const MyApp());
 }
 
+
 /// The root widget of the application.
 /// 
 /// Configures the app's theme and initial route.
