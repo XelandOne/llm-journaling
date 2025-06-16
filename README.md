@@ -1,7 +1,7 @@
 # LLM Journal App
 A journaling assistant (AI Secretary) powered by LLMs that helps users track their events, feelings, and provides personalized advice and motivation based on their Google Calender. 
 The idea and the motivation behind this was to have a clean overview of your upcoming deadlines and that the user can interact with an LLM to be informed of the upcoming deadlines and how to approach them.
-This Project was build in 24h during the {Tech: Karlsruhe} AI Hackathon.
+This project was build in 24h during the {Tech: Karlsruhe} AI Hackathon and selected as a finalist.
 
 ## Features
 - **Chat System**: Chat with an AI and ask it for upcoming events and deadlines. Add new events in your calender.
