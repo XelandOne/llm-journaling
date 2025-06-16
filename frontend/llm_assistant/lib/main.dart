@@ -1,13 +1,21 @@
+// Copyright (c) 2024 LLM Journal. All rights reserved.
+
 import 'package:flutter/material.dart';
-import 'package:cupertino_icons/cupertino_icons.dart';
+import 'package:flutter/cupertino.dart';
 import 'screens/start_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/chat_screen.dart';
 
+/// The main entry point of the LLM Journal application.
+/// 
+/// This widget sets up the application theme and initial navigation structure.
 void main() {
   runApp(const MyApp());
 }
 
+/// The root widget of the application.
+/// 
+/// Configures the app's theme and initial route.
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -56,6 +64,10 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// The main navigation widget that handles bottom navigation between screens.
+/// 
+/// Manages the state of the current selected screen and provides navigation
+/// between Start, Dashboard, and Chat screens.
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
 

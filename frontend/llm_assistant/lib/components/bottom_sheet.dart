@@ -1,27 +1,39 @@
+// Copyright (c) 2024 LLM Journal. All rights reserved.
+
 import 'package:flutter/material.dart';
 import '../schemes/event.dart';
 import '../services/api_service.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
+/// A bottom sheet widget that displays detailed information about an event.
+/// 
+/// Shows the event's details and AI-generated advice in a draggable sheet that
+/// can be expanded or collapsed.
 class EventBottomSheet extends StatefulWidget {
+  /// The event to display in the bottom sheet.
   final Event event;
 
+  /// Creates a new [EventBottomSheet] instance.
   const EventBottomSheet({super.key, required this.event});
 
   @override
   State<EventBottomSheet> createState() => _EventBottomSheetState();
 }
 
+/// The state for the EventBottomSheet widget.
+/// 
+/// Manages the loading and display of event details and AI-generated advice.
 class _EventBottomSheetState extends State<EventBottomSheet> {
-  final ApiService apiService = ApiService();
+  final ApiService _apiService = ApiService();
   late Future<String> _adviceFuture;
 
   @override
   void initState() {
     super.initState();
-    _adviceFuture = apiService.getEventAdvice(widget.event);
+    _adviceFuture = _apiService.getEventAdvice(widget.event);
   }
 
+  /// Formats a DateTime object into a 12-hour time string with AM/PM.
   String _formatTime(DateTime dt) {
     final hour = dt.hour > 12 ? dt.hour - 12 : dt.hour;
     final ampm = dt.hour >= 12 ? 'pm' : 'am';
