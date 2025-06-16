@@ -6,7 +6,7 @@ This project was build in 24h during the {Tech: Karlsruhe} AI Hackathon and sele
 ## Features
 - **Chat System**: Chat with an AI and ask it for upcoming events and deadlines. Add new events in your calender.
 - **Event Tracking**: Automatically extracts and manages calendar events
-- **Feeling Analysis**: Analyzes and tracks user emotions and feelings based on chat
+- **Feeling Analysis**: Analyzes and tracks user emotions and feelings based on chat 
 - **Smart Advice**: Provides personalized advice based on events and feelings
 - **Motivational Quotes**: Generates relevant motivational quotes based on the upcoming events.
 - **Calendar Integration**: Seamlessly integrates with Google Calendar
