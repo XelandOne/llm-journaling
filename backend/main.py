@@ -1,9 +1,9 @@
-from fastapi import FastAPI, Query, Body
-from typing import List, Optional
-from datetime import datetime, date
+from fastapi import Query
+from typing import List
+from datetime import datetime
 import uvicorn
-from database import SessionLocal, Base, engine
-import models as models
+from backend.database_integration.database import SessionLocal, Base, engine
+from backend.database_integration import models as models
 
 # from backend.mistral import extract_event_and_feeling, generate_advice
 from sqlalchemy.orm import Session

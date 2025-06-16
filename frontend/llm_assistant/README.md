@@ -1,16 +1,49 @@
-# llm_assistant
+# LLM Journal Frontend
 
-A new Flutter project.
+The **LLM Journal Frontend** is a Flutter-based mobile and web application that serves as the user interface for the LLM Journal system. It allows users to interact with an AI-powered assistant, manage their personal calendar, and track emotional well-being through a modern, intuitive interface.
+
+## Features
+
+- Real-time chat interface powered by AI
+- Calendar event management and visualization
+- Feeling tracking with sentiment analysis
+- Voice interaction and speech synthesis capabilities
+- Full cross-platform support (iOS, Android, Web)
+
+## Tech Stack
+
+- **Flutter** — Cross-platform UI framework
+- **Provider** — State management
+- **HTTP** — API communication
+- **WebSocket** — Real-time updates
+- **Material Design** — UI components & design language
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+- Flutter SDK installed ([Install Flutter](https://flutter.dev/docs/get-started/install))
+- Xcode (for iOS builds)
+- Android Studio (for Android builds, optional)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Installation
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Install dependencies:
+   ```bash
+   flutter pub get
+   ```
+
+2. Run the app:
+   - For iOS:
+     ```bash
+     flutter run --ios
+     ```
+   - For Android:
+     ```bash
+     flutter run --android
+     ```
+   - For Web:
+     ```bash
+     flutter run -d chrome
+     ```
+

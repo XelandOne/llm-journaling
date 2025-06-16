@@ -1,51 +1,128 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
   title: LifeChat API
-  version: "1.0.0"
-  description: API for logging and analyzing life events and feelings.
+  description: API for logging and analyzing life events and feelings
+  version: 1.0.0
+
 servers:
-  - url: http://127.0.0.1:8000
+  - url: http://localhost:8000
+    description: Local development server
+
+components:
+  schemas:
+    Event:
+      type: object
+      required:
+        - date
+        - startTime
+        - endTime
+        - description
+        - tags
+        - name
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2025-06-15"
+        startTime:
+          type: string
+          format: date-time
+          example: "2025-06-15T09:00:00"
+        endTime:
+          type: string
+          format: date-time
+          example: "2025-06-15T11:00:00"
+        description:
+          type: string
+          example: "Team meeting to discuss project updates"
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["work", "meeting"]
+        name:
+          type: string
+          example: "Team Meeting"
+
+    Feeling:
+      type: object
+      required:
+        - feelings
+        - score
+        - datetime
+      properties:
+        feelings:
+          type: array
+          items:
+            type: string
+          example: ["happy", "motivated"]
+        score:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 8
+        datetime:
+          type: string
+          format: date-time
+          example: "2025-06-15T10:00:00"
+
+    ChatResponse:
+      type: object
+      properties:
+        response:
+          type: string
+          example: "I've added your meeting to the calendar and noted your positive mood."
+        created_events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+        feeling:
+          type: array
+          items:
+            $ref: '#/components/schemas/Feeling'
+
 paths:
-  /addEvent:
+  /lifeChat:
     post:
-      summary: Add a new event
-      parameters:
-        - name: description
-          in: query
-          required: true
-          schema:
-            type: string
+      summary: Submit a chat message and get AI response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - chat
+              properties:
+                chat:
+                  type: string
+                  example: "I have a team meeting tomorrow at 10 AM"
       responses:
         '200':
-          description: Event successfully added
+          description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Event'
-  /addFeeling:
-    post:
-      summary: Add a new feeling
-      parameters:
-        - name: feelings
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: score
-          in: query
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Feeling successfully added
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Feeling'
-  /getAllEvents:
+                $ref: '#/components/schemas/ChatResponse'
+
+  /getEvents:
     get:
-      summary: Retrieve all events
+      summary: Get events within a time range
+      parameters:
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+          example: "2025-06-15T00:00:00"
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+          example: "2025-06-15T23:59:59"
       responses:
         '200':
           description: List of events
@@ -55,9 +132,25 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Event'
-  /getAllFeelings:
+
+  /getFeelings:
     get:
-      summary: Retrieve all feelings
+      summary: Get feelings within a time range
+      parameters:
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+          example: "2025-06-15T00:00:00"
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+          example: "2025-06-15T23:59:59"
       responses:
         '200':
           description: List of feelings
@@ -67,60 +160,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Feeling'
-  /getEvents:
-    get:
-      summary: Get events between two datetimes.
-      parameters:
-        - name: startTime
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date-time
-        - name: endTime
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date-time
-      responses:
-        '200':
-          description: List of events.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Event'
-  /getFeelings:
-    get:
-      summary: Get feelings between two datetimes.
-      parameters:
-        - name: startTime
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date-time
-        - name: endTime
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date-time
-      responses:
-        '200':
-          description: List of feelings.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Feeling'
 
   /getAdvice:
     get:
-      summary: Get advice based on a date range
+      summary: Get AI-generated advice based on events and feelings
       parameters:
         - name: startTime
           in: query
@@ -128,92 +171,46 @@ paths:
           schema:
             type: string
             format: date-time
+          example: "2025-06-15T00:00:00"
         - name: endTime
           in: query
           required: true
           schema:
             type: string
             format: date-time
+          example: "2025-06-15T23:59:59"
       responses:
         '200':
           description: AI-generated advice
           content:
-            application/json:
+            text/plain:
               schema:
                 type: string
-  /lifeChat:
-    post:
-      summary: Submit a life chat and extract event/feeling
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                chat:
-                  type: string
+                example: "Based on your recent activities and mood, I suggest..."
+
+  /getMotivationalSpeech:
+    get:
+      summary: Get AI-generated motivational speech as audio
+      parameters:
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+          example: "2025-06-15T00:00:00"
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+          example: "2025-06-15T23:59:59"
       responses:
         '200':
-          description: Extracted event and feeling
+          description: Audio file of motivational speech
           content:
-            application/json:
+            audio/mpeg:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Ohh, this sounds very interesting. I have added a few events to your life log."
-                  events:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Event'
-                  feeling:
-                    $ref: '#/components/schemas/Feeling'
-                required:
-                  - message
-                  - events
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  detail:
-                    type: string
-components:
-  schemas:
-    Event:
-      type: object
-      properties:
-        id:
-          type: integer
-        startTime:
-          type: string
-          format: date-time
-        endTime:
-          type: string
-          format: date-time
-        description:
-          type: string
-        name:
-          type: string
-        tags:
-          type: string
-    Feeling:
-      type: object
-      properties:
-        feelings:
-          type: array
-          items:
-            type: string
-            enum: [ calm, motivated, stressed, anxious, happy, sad, angry, relaxed, excited, tired ]
-            description: Enum of emotional states
-        score:
-          type: integer
-          minimum: 1
-          maximum: 10
-        datetime:
-          type: string
-          format: date-time
+                type: string
+                format: binary

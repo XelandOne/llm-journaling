@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cupertino_icons/cupertino_icons.dart';
-import 'start_screen.dart';
-import 'dashboard_screen.dart';
-import 'chat_screen.dart';
+import 'screens/start_screen.dart';
+import 'screens/dashboard_screen.dart';
+import 'screens/chat_screen.dart';
 
 void main() {
   runApp(const MyApp());

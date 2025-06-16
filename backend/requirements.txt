@@ -4,3 +4,12 @@ sqlalchemy
 aiosqlite
 mistralai>=1.8.2
 aci-sdk
+fastapi
+uvicorn
+pydantic
+pydub
+sounddevice
+soundfile
+openai
+pytz
+rich

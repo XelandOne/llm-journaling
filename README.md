@@ -18,10 +18,23 @@ This Project was build in 24h during the {Tech: Karlsruhe} AI Hackathon.
 - Elevenlabs for Voice
 - Flutter for frontend
 
-# Screenshots
-TODO: add ui screenshots with core functionalities
+## Project Structure
 
-# Set up 
+```
+llm-journal/
+├── backend/               # Backend server and API
+│   ├── main.py           # FastAPI application and endpoints
+│   ├── mistral.py        # Mistral AI integration
+│   ├── gcal.py           # Google Calendar integration
+│   ├── voice.py          # Voice processing utilities
+│   ├── database.py       # Database configuration
+│   ├── models.py         # SQLAlchemy models
+│   └── requirements.txt  # Python dependencies
+└── frontend/             # Frontend application
+    ├── ui_planning/      # UI planning documents
+    ├── ui_demo/          # UI demo implementation
+    └── llm_assistant/    # LLM assistant implementation
+```
 
 ## Set API keys
 
@@ -50,17 +63,6 @@ TODO ...
 
 
 
-# Project Structure
-TODO: add more
-```
-llm-journal-1/
-├── backend/
-│   ├── mistral.py          # Main LLM interaction logic
-│   ├── schemes.py          # Data models and schemas
-│   └── gcal/               # Google Calendar integration
-├── requirements.txt        # Project dependencies
-└── README.md              
-```
+## License
 
-# License
-MIT License
+This project is licensed under the MIT License - see the LICENSE file for details.

@@ -117,20 +117,19 @@ END_DATE = datetime(2025, 7, 1)
 
 
 # Generate dummy events and feelings for each day in the range
-import random
 from datetime import timedelta
 
 
 
 def generate_dummy_events():
     events = []
-    day = datetime(2025, 6, 15)
+    day = datetime(2025, 6, 16)
 
     events.append(
         Event(
             date=day.strftime("%Y-%m-%d"),
-            startTime=datetime(2025, 6, 15, 9, 0).isoformat(),
-            endTime=datetime(2025, 6, 15, 11, 0).isoformat(),
+            startTime=datetime(2025, 6, 16, 9, 0).isoformat(),
+            endTime=datetime(2025, 6, 16, 11, 0).isoformat(),
             description="Hands-on session to prototype and build initial solutions.",
             tags=["work", "development"],
             name="Prototyping"
